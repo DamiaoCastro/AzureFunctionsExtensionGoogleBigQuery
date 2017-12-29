@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.0.9.3</Version>
+    <Authors>Damiao Castro</Authors>
+    <Company>fowet.com</Company>
+    <Description>Extension for Google BigQuery to work with Azure Functions and Azure Webjobs.
+If this package was done by Microsoft itself would be under the namespace "Microsoft.Azure.WebJobs.Extensions.GoogleBigQuery"</Description>
+    <PackageProjectUrl>https://github.com/DamiaoCastro/AzureFunctionsExtensionGoogleBigQuery/wiki</PackageProjectUrl>
+    <PackageId>AzureFunctions.Extensions.GoogleBigQuery</PackageId>
+    <Product>AzureFunctions.Extensions.GoogleBigQuery</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ValueProvider.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="3.0.0-beta3" />
+	<PackageReference Include="Google.Cloud.BigQuery.V2" Version="1.0.1" />
+  </ItemGroup>
+
+</Project>
