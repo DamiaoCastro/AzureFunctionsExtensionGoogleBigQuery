@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureFunctions.Extensions.GoogleBigQuery.ComponentTests", "AzureFunctions.Extensions.GoogleBigQuery.ComponentTests\AzureFunctions.Extensions.GoogleBigQuery.ComponentTests.csproj", "{06CDE008-8819-4EEB-90C1-BDA83029D09A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureFunctions.Extensions.GoogleBigQuery.DemoProject1", "AzureFunctions.Extensions.GoogleBigQuery.DemoProject1\AzureFunctions.Extensions.GoogleBigQuery.DemoProject1.csproj", "{B117DF3E-C655-420C-B1F1-A30854B76334}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{06CDE008-8819-4EEB-90C1-BDA83029D09A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06CDE008-8819-4EEB-90C1-BDA83029D09A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06CDE008-8819-4EEB-90C1-BDA83029D09A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
