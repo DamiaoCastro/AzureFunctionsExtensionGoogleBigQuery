@@ -23,6 +23,14 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
 
             //...
 
+            Assert.IsNull(tabelSchema.Fields[4].Description);
+            Assert.AreEqual("BoolEnumerable", tabelSchema.Fields[4].Name);
+            Assert.AreEqual("REPEATED", tabelSchema.Fields[4].Mode);
+            Assert.AreEqual("BOOLEAN", tabelSchema.Fields[4].Type);
+            Assert.IsNull(tabelSchema.Fields[4].Fields);
+            
+            //...
+
             Assert.IsNull(tabelSchema.Fields[65].Description);
             Assert.AreEqual("Record1", tabelSchema.Fields[65].Name);
             Assert.AreEqual("NULLABLE", tabelSchema.Fields[65].Mode);

@@ -48,13 +48,10 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 innerPropertyType = propertyType.GenericTypeArguments[0];
             } else {
                 if (propertyType.IsArray) {
-
-                    //TODO: find real base type in array
-
-                    innerPropertyType = propertyType.GenericTypeArguments[0];
+                    innerPropertyType = propertyType.GetElementType();
                 }
             }
-            
+
             if (innerPropertyType.IsClass && innerPropertyType.Namespace != "System") {//crappy but works for now
 
                 mode = BigQueryFieldMode.Nullable;
@@ -123,6 +120,10 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 isIEnumerable = true;
             }
 
+            if (isIEnumerable && propertyTypeName != "BYTE") {
+                fieldMode = BigQueryFieldMode.Repeated;
+            }
+
             switch (propertyTypeName) {
                 case "BOOLEAN":
                     type = "BOOLEAN";
@@ -150,6 +151,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                         type = "BYTES";
                     } else {
                         type = "INTEGER";
+                        fieldMode = BigQueryFieldMode.Repeated;
                     }
                     break;
             }

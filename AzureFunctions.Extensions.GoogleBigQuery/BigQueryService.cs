@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
 
-    internal class BigQueryService {
+    public class BigQueryService {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
         private System.Globalization.CultureInfo cultureUS = new System.Globalization.CultureInfo("en-US");
@@ -75,7 +75,10 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken) {
 
-            GoogleCredential googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
+            GoogleCredential googleCredential = null;
+            if (credentials != null) {
+                googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
+            }
             var client = Google.Cloud.BigQuery.V2.BigQueryClient.Create(projectId, googleCredential);
 
             return client.GetOrCreateTableAsync(
