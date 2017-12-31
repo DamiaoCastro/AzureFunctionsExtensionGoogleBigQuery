@@ -6,8 +6,6 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Bigquery.v2.Data;
 using System.Threading.Tasks;
 using System.Reflection;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
@@ -29,51 +27,51 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             this.projectId = projectId;
             this.datasetId = datasetId;
             this.tableId = tableId;
-            (this.tableSchema, this.properties) = GetTableSchema(itemType);
+            (this.tableSchema, this.properties) = TableSchemaBuilderService.GetTableSchema(itemType);
         }
 
-        private (TableSchema, IEnumerable<System.Reflection.PropertyInfo>) GetTableSchema(Type tableType) {
+        //private (TableSchema, IEnumerable<System.Reflection.PropertyInfo>) GetTableSchema(Type tableType) {
 
-            var properties = tableType.GetProperties()
-                    .Where(c => c.PropertyType.IsPublic && c.CustomAttributes.Any(a => a.AttributeType == typeof(ColumnAttribute)));
+        //    var properties = tableType.GetProperties()
+        //            .Where(c => c.PropertyType.IsPublic && c.CustomAttributes.Any(a => a.AttributeType == typeof(ColumnAttribute)));
 
-            var fields = from property in properties
-                         let type = GetBigQueryType(property.PropertyType)
-                         let mode = property.CustomAttributes.Any(a => a.AttributeType == typeof(RequiredAttribute)) ? "REQUIRED" : "NULLABLE"
-                         select new TableFieldSchema() { Name = property.Name, Type = type, Mode = mode }
-                         ;
+        //    var fields = from property in properties
+        //                 let type = GetBigQueryType(property.PropertyType)
+        //                 let mode = property.CustomAttributes.Any(a => a.AttributeType == typeof(RequiredAttribute)) ? "REQUIRED" : "NULLABLE"
+        //                 select new TableFieldSchema() { Name = property.Name, Type = type, Mode = mode }
+        //                 ;
 
-            var schema = new Google.Apis.Bigquery.v2.Data.TableSchema() { Fields = fields.ToList() };
+        //    var schema = new Google.Apis.Bigquery.v2.Data.TableSchema() { Fields = fields.ToList() };
 
-            return (schema, properties);
-        }
+        //    return (schema, properties);
+        //}
 
-        private string GetBigQueryType(Type propertyType) {
+        //private string GetBigQueryType(Type propertyType) {
 
-            //STRING
-            //BYTES
-            //INTEGER   
-            //FLOAT
-            //BOOLEAN
-            //TIMESTAMP
-            //DATE
-            //TIME
-            //DATETIME
-            //RECORD
+        //    //STRING
+        //    //BYTES
+        //    //INTEGER   
+        //    //FLOAT
+        //    //BOOLEAN
+        //    //TIMESTAMP
+        //    //DATE
+        //    //TIME
+        //    //DATETIME
+        //    //RECORD
 
-            if (propertyType.Name.Equals("Nullable`1")) {
-                propertyType = propertyType.GenericTypeArguments[0];
-            }
+        //    if (propertyType.Name.Equals("Nullable`1")) {
+        //        propertyType = propertyType.GenericTypeArguments[0];
+        //    }
 
-            switch (propertyType.Name.ToUpper()) {
-                case "INT":
-                case "INT32":
-                case "INT64":
-                    return BigQueryDbType.Int64.ToString();
-                default:
-                    return propertyType.Name.ToUpper();
-            }
-        }
+        //    switch (propertyType.Name.ToUpper()) {
+        //        case "INT":
+        //        case "INT32":
+        //        case "INT64":
+        //            return "INTEGER";
+        //        default:
+        //            return propertyType.Name.ToUpper();
+        //    }
+        //}
 
         private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken) {
 
