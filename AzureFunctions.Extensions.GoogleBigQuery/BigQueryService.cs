@@ -81,12 +81,21 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             }
             var client = Google.Cloud.BigQuery.V2.BigQueryClient.Create(projectId, googleCredential);
 
+
+            //client.GetTable
+
+            //tableSchema.Fields.Insert(0, new TableFieldSchema() { Name = "_PARTITIONTIME", Mode = "REQUIRED", Type = "DATE" });
+
             return client.GetOrCreateTableAsync(
                         datasetId,
                         $"{tableId}${date.ToString("yyyyMMdd")}",
+                        //tableId,
                         tableSchema,
                         new GetTableOptions(),
-                        new CreateTableOptions(),
+                        new CreateTableOptions() {
+                            FriendlyName = $"{tableId}${date.ToString("yyyyMMdd")}",
+                            TimePartitioning = new TimePartitioning() { Type = "DAY"/*, Field = "_PARTITIONTIME"*/ }
+                        },
                         cancellationToken);
         }
 
@@ -103,7 +112,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
                     return GetTable(date, cancellationToken)
                         .ContinueWith((tableTask) => {
-                            var table = tableTask.Result;
+                            BigQueryTable table = tableTask.Result;
                             return table.InsertRowsAsync(bigQueryRows, new InsertOptions() { AllowUnknownFields = true }, cancellationToken);
                         }, cancellationToken).Unwrap();
 
@@ -115,9 +124,37 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         private object GetBigQueryValue(PropertyInfo property, GoogleBigQueryRow row) {
             switch (property.PropertyType.Name.ToUpper()) {
+                case "BYTE":
+                    return (int)(byte)property.GetValue(row);
+                case "CHAR":
+                    return ((char)property.GetValue(row)).ToString();
+                case "CHAR[]":
+                    return ((char[])property.GetValue(row)).ToString();
                 case "DATETIME":
-                    var value = (DateTime)property.GetValue(row);
-                    return value.ToString(BigQueryDateTimeFormat, cultureUS);
+                    var datetimeValue = (DateTime)property.GetValue(row);
+                    return datetimeValue.ToString(BigQueryDateTimeFormat, cultureUS);
+                case "DECIMAL":
+                    return (float)(decimal)property.GetValue(row);
+                case "GUID":
+                    return ((Guid)property.GetValue(row)).ToString();
+                case "UINT64":
+                    return (int)(UInt64)property.GetValue(row);
+                case "IENUMERABLE`1":
+                    var enumerableValue = property.GetValue(row);
+                    Type innerPropertyType = property.PropertyType.GenericTypeArguments[0];
+                    switch (innerPropertyType.Name.ToUpper()) {
+                        case "BOOLEAN":
+                            return new bool[] { };
+                        case "CHAR":
+                            return ((char[])enumerableValue).ToString();
+                        case "DECIMAL":
+                            return ((decimal[])enumerableValue).Select(c => (float)c);
+                        case "SINGLE":
+                            //return ((Single[])enumerableValue).Select(c => (float)c);
+                            return new float[] { };
+                    }
+
+                    return enumerableValue;
                 default:
                     return property.GetValue(row);
             }
