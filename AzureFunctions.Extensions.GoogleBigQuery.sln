@@ -5,6 +5,14 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery", "AzureFunctions.Extensions.GoogleBigQuery\AzureFunctions.Extensions.GoogleBigQuery.csproj", "{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.ComponentTests", "AzureFunctions.Extensions.GoogleBigQuery.ComponentTests\AzureFunctions.Extensions.GoogleBigQuery.ComponentTests.csproj", "{06CDE008-8819-4EEB-90C1-BDA83029D09A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.DemoProject1", "AzureFunctions.Extensions.GoogleBigQuery.DemoProject1\AzureFunctions.Extensions.GoogleBigQuery.DemoProject1.csproj", "{B117DF3E-C655-420C-B1F1-A30854B76334}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.TestsCommon", "AzureFunctions.Extensions.GoogleBigQuery.TestsCommon\AzureFunctions.Extensions.GoogleBigQuery.TestsCommon.csproj", "{DC9B4723-4D19-4DEE-B0E2-49025FEC252E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.UnitTests", "AzureFunctions.Extensions.GoogleBigQuery.UnitTests\AzureFunctions.Extensions.GoogleBigQuery.UnitTests.csproj", "{452CBDD6-B6DF-4C80-A76E-8501D98456C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +23,22 @@ Global
 		{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06CDE008-8819-4EEB-90C1-BDA83029D09A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06CDE008-8819-4EEB-90C1-BDA83029D09A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06CDE008-8819-4EEB-90C1-BDA83029D09A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06CDE008-8819-4EEB-90C1-BDA83029D09A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B117DF3E-C655-420C-B1F1-A30854B76334}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC9B4723-4D19-4DEE-B0E2-49025FEC252E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC9B4723-4D19-4DEE-B0E2-49025FEC252E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC9B4723-4D19-4DEE-B0E2-49025FEC252E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC9B4723-4D19-4DEE-B0E2-49025FEC252E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

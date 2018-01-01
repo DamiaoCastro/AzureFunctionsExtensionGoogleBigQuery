@@ -48,9 +48,13 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 var tasks = new List<Task>();
 
                 if (items.Count > 0) {
-                    var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
-                    var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
-                    var credentials = System.IO.File.ReadAllBytes(fullPath);
+
+                    byte[] credentials = null;
+                    if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
+                        var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
+                        var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
+                        credentials = System.IO.File.ReadAllBytes(fullPath);
+                    }
 
                     Type itemType = items.First().GetType();
 
