@@ -28,7 +28,31 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
             Assert.AreEqual("REPEATED", tabelSchema.Fields[4].Mode);
             Assert.AreEqual("BOOLEAN", tabelSchema.Fields[4].Type);
             Assert.IsNull(tabelSchema.Fields[4].Fields);
-            
+
+            //...
+
+            Assert.IsNull(tabelSchema.Fields[8].Description);
+            Assert.AreEqual("Byte1Nullable", tabelSchema.Fields[8].Name);
+            Assert.AreEqual("NULLABLE", tabelSchema.Fields[8].Mode);
+            Assert.AreEqual("INTEGER", tabelSchema.Fields[8].Type);
+            Assert.IsNull(tabelSchema.Fields[8].Fields);
+
+            //...
+
+            Assert.IsNull(tabelSchema.Fields[10].Description);
+            Assert.AreEqual("Byte1Enumerable", tabelSchema.Fields[10].Name);
+            Assert.AreEqual("NULLABLE", tabelSchema.Fields[10].Mode);
+            Assert.AreEqual("BYTES", tabelSchema.Fields[10].Type);
+            Assert.IsNull(tabelSchema.Fields[10].Fields);
+
+            //...
+
+            Assert.IsNull(tabelSchema.Fields[15].Description);
+            Assert.AreEqual("CharEnumerable", tabelSchema.Fields[15].Name);
+            Assert.AreEqual("NULLABLE", tabelSchema.Fields[15].Mode);
+            Assert.AreEqual("STRING", tabelSchema.Fields[15].Type);
+            Assert.IsNull(tabelSchema.Fields[15].Fields);
+
             //...
 
             Assert.IsNull(tabelSchema.Fields[65].Description);

@@ -5,7 +5,6 @@ using Google.Cloud.BigQuery.V2;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Bigquery.v2.Data;
 using System.Threading.Tasks;
-using System.Reflection;
 using System.Threading;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
@@ -33,19 +32,14 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             if (credentials != null) {
                 googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
             }
-            var client = Google.Cloud.BigQuery.V2.BigQueryClient.Create(projectId, googleCredential);
-            
-            return client.GetOrCreateTableAsync(
-                        datasetId,
-                        $"{tableId}${date.ToString("yyyyMMdd")}",
-                        //tableId,
-                        tableSchema,
-                        new GetTableOptions(),
-                        new CreateTableOptions() {
-                            FriendlyName = $"{tableId}${date.ToString("yyyyMMdd")}",
-                            TimePartitioning = new TimePartitioning() { Type = "DAY"/*, Field = "_PARTITIONTIME"*/ }
-                        },
-                        cancellationToken);
+            var client = BigQueryClient.Create(projectId, googleCredential);
+
+            //return client.GetOrCreateTableAsync(datasetId, tableId, tableSchema, null, new CreateTableOptions() { TimePartitioning = new TimePartitioning() { Type = "DAY" } }, cancellationToken)
+            //            .ContinueWith((createTableTask) => {
+            //                return client.GetTableAsync(datasetId, $"{tableId}${date:yyyyMMdd}", null, cancellationToken);
+            //            }, cancellationToken).Unwrap();
+            return client.GetTableAsync(datasetId, $"{tableId}${date:yyyyMMdd}", null, cancellationToken);
+
         }
 
         public Task InsertRowsAsync(DateTime date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken) {
@@ -56,15 +50,15 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 if (dateDiff >= -31 && dateDiff <= 16) {
 
                     var bigQueryRows = rows.Select(c => BigQueryInsertRowService.GetBigQueryInsertRow(c, dictionaryOfProperties));
-                    
+
                     return GetTable(date, cancellationToken)
                         .ContinueWith((tableTask) => {
                             BigQueryTable table = tableTask.Result;
-                            
+
                             return table.InsertRowsAsync(bigQueryRows, new InsertOptions() { AllowUnknownFields = true }, cancellationToken)
                                         .ContinueWith((insertRowsTask) => {
                                             if (insertRowsTask.IsFaulted) {
-                                                //... log trace
+                                                throw insertRowsTask.Exception.InnerExceptions.First();
                                             }
                                         });
                         }, cancellationToken).Unwrap();
@@ -74,6 +68,6 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
             return Task.WhenAll();
         }
-        
+
     }
 }

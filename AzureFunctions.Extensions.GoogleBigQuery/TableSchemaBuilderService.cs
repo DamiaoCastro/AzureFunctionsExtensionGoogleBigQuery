@@ -102,9 +102,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             //-----------------------------------
 
             string type = "STRING";
-            BigQueryFieldMode fieldMode = propertyInfo
-                                            .CustomAttributes
-                                            .Any(a => a.AttributeType == typeof(RequiredAttribute)) ? BigQueryFieldMode.Required : BigQueryFieldMode.Nullable;
+            BigQueryFieldMode fieldMode = GetBaseFiledMode(propertyInfo);
 
             Type propertyType = propertyInfo.PropertyType;
 
@@ -134,6 +132,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 case "BOOLEAN":
                     type = "BOOLEAN";
                     break;
+                case "CHAR":
+                    fieldMode = GetBaseFiledMode(propertyInfo);
+                    break;
                 case "DECIMAL":
                 case "DOUBLE":
                 case "SINGLE":
@@ -155,14 +156,20 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 case "BYTE":
                     if (isIEnumerable) {
                         type = "BYTES";
+                        fieldMode = GetBaseFiledMode(propertyInfo);
                     } else {
                         type = "INTEGER";
-                        fieldMode = BigQueryFieldMode.Repeated;
                     }
                     break;
             }
 
             return (type, fieldMode);
+        }
+
+        private static BigQueryFieldMode GetBaseFiledMode(PropertyInfo propertyInfo) {
+            return propertyInfo
+                                                        .CustomAttributes
+                                                        .Any(a => a.AttributeType == typeof(RequiredAttribute)) ? BigQueryFieldMode.Required : BigQueryFieldMode.Nullable;
         }
 
         private static IEnumerable<PropertyInfo> GetPropertyInfo(Type type) {

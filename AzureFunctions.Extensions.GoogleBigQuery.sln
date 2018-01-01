@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.G
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.DemoProject1", "AzureFunctions.Extensions.GoogleBigQuery.DemoProject1\AzureFunctions.Extensions.GoogleBigQuery.DemoProject1.csproj", "{B117DF3E-C655-420C-B1F1-A30854B76334}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureFunctions.Extensions.GoogleBigQuery.TestsCommon", "AzureFunctions.Extensions.GoogleBigQuery.TestsCommon\AzureFunctions.Extensions.GoogleBigQuery.TestsCommon.csproj", "{DC9B4723-4D19-4DEE-B0E2-49025FEC252E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.TestsCommon", "AzureFunctions.Extensions.GoogleBigQuery.TestsCommon\AzureFunctions.Extensions.GoogleBigQuery.TestsCommon.csproj", "{DC9B4723-4D19-4DEE-B0E2-49025FEC252E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureFunctions.Extensions.GoogleBigQuery.UnitTests", "AzureFunctions.Extensions.GoogleBigQuery.UnitTests\AzureFunctions.Extensions.GoogleBigQuery.UnitTests.csproj", "{452CBDD6-B6DF-4C80-A76E-8501D98456C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.UnitTests", "AzureFunctions.Extensions.GoogleBigQuery.UnitTests\AzureFunctions.Extensions.GoogleBigQuery.UnitTests.csproj", "{452CBDD6-B6DF-4C80-A76E-8501D98456C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
