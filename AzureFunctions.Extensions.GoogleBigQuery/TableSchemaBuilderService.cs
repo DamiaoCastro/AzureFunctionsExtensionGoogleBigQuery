@@ -11,19 +11,21 @@ using System.Reflection;
 namespace AzureFunctions.Extensions.GoogleBigQuery {
     public class TableSchemaBuilderService {
 
-        public static (TableSchema, IEnumerable<System.Reflection.PropertyInfo>) GetTableSchema(Type tableType) {
+        public static (TableSchema, IDictionary<string, IEnumerable<System.Reflection.PropertyInfo>>) GetTableSchema(Type tableType) {
 
-            var properties = tableType.GetProperties()
-                    .Where(c => c.PropertyType.IsPublic && c.CustomAttributes.Any(a => a.AttributeType == typeof(ColumnAttribute)));
+            var properties = GetPropertyInfo(tableType);
 
-            var fields = properties.Select(p => GetTableFieldSchema(p));
+            var dictionaryOfProperties = new Dictionary<string, IEnumerable<System.Reflection.PropertyInfo>>();
+            dictionaryOfProperties.Add(tableType.FullName, properties);
+
+            var fields = properties.Select(p => GetTableFieldSchema(p, dictionaryOfProperties));
 
             var schema = new Google.Apis.Bigquery.v2.Data.TableSchema() { Fields = fields.ToList() };
 
-            return (schema, properties);
+            return (schema, dictionaryOfProperties);
         }
 
-        private static TableFieldSchema GetTableFieldSchema(PropertyInfo propertyInfo) {
+        private static TableFieldSchema GetTableFieldSchema(PropertyInfo propertyInfo, Dictionary<string, IEnumerable<System.Reflection.PropertyInfo>> dictionaryOfProperties) {
 
             //var fields = from property in properties
             //             let mode = BigQueryFieldMode.Nullable
@@ -59,10 +61,14 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                     mode = BigQueryFieldMode.Repeated;
                 }
 
-                fields = innerPropertyType
-                    .GetProperties()
-                    .Where(c => c.PropertyType.IsPublic && c.CustomAttributes.Any(a => a.AttributeType == typeof(ColumnAttribute)))
-                    .Select(p => GetTableFieldSchema(p)).ToList();
+                IEnumerable<PropertyInfo> properties = null;
+                if (dictionaryOfProperties.ContainsKey(innerPropertyType.FullName)) {
+                    properties = dictionaryOfProperties[innerPropertyType.FullName];
+                } else {
+                    properties = GetPropertyInfo(innerPropertyType);
+                    dictionaryOfProperties.Add(innerPropertyType.FullName, properties);
+                }
+                fields = properties.Select(p => GetTableFieldSchema(p, dictionaryOfProperties)).ToList();
 
                 type = "RECORD";
 
@@ -157,6 +163,12 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             }
 
             return (type, fieldMode);
+        }
+
+        private static IEnumerable<PropertyInfo> GetPropertyInfo(Type type) {
+            return type
+                    .GetProperties()
+                    .Where(c => c.PropertyType.IsPublic && c.CustomAttributes.Any(a => a.AttributeType == typeof(ColumnAttribute)));
         }
 
     }

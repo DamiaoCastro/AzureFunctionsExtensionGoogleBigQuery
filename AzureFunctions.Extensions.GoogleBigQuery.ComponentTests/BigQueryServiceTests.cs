@@ -2,6 +2,7 @@ using AzureFunctions.Extensions.GoogleBigQuery.TestsCommon;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,7 +32,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.ComponentTests {
                 Byte2Enumerable = new byte[] { },
                 CharEnumerable = new char[] { },
                 DateTimeEnumerable = new DateTime[] { },
-                DateTimeOffsetEnumerable =new DateTimeOffset[] { },
+                DateTimeOffsetEnumerable = new DateTimeOffset[] { },
                 DecimalEnumerable = new decimal[] { },
                 FloatEnumerable = new float[] { },
                 GuidEnumerable = new Guid[] { },
@@ -43,6 +44,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.ComponentTests {
                 UInt16Enumerable = new UInt16[] { },
                 UInt32Enumerable = new UInt32[] { },
                 UInt64Enumerable = new UInt64[] { },
+
+                Record2 = new List<SimpleEntity1> { },
+                Record3 = new SimpleEntity1[] { }
             };
 
             //Act
