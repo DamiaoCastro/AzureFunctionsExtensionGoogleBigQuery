@@ -14,7 +14,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.ComponentTests {
 
         [TestInitialize]
         public void Initialize() {
-            bigQueryService = new BigQueryService(null, "damiao-1982", "extensiontest", "table1", typeof(TestBigQueryRow));
+            bigQueryService = new BigQueryService(new GoogleBigQueryAttribute(null, "damiao-1982", "extensiontest", "table1"), typeof(TestBigQueryRow));
         }
 
         [TestMethod]

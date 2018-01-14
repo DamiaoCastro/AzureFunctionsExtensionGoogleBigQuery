@@ -11,35 +11,35 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
     public class BigQueryService {
 
-        private readonly byte[] credentials;
-        private readonly string projectId;
-        private readonly string datasetId;
-        private readonly string tableId;
+        private readonly GoogleBigQueryAttribute googleBigQueryAttribute;
         private readonly TableSchema tableSchema;
         private readonly IDictionary<string, IEnumerable<System.Reflection.PropertyInfo>> dictionaryOfProperties;
 
-        public BigQueryService(byte[] credentials, string projectId, string datasetId, string tableId, Type itemType) {
-            this.credentials = credentials;
-            this.projectId = projectId;
-            this.datasetId = datasetId;
-            this.tableId = tableId;
+        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, Type itemType) {
+            this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
             (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
         }
 
         private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken) {
 
             GoogleCredential googleCredential = null;
-            if (credentials != null) {
-                googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
+            if (googleBigQueryAttribute.Credentials != null) {
+                googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(googleBigQueryAttribute.Credentials));
+            } else {
+                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
+                    var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
+                    var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
+                    var credentials = System.IO.File.ReadAllBytes(fullPath);
+                    googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
+                }
             }
-            var client = BigQueryClient.Create(projectId, googleCredential);
+            var client = BigQueryClient.Create(googleBigQueryAttribute.ProjectId, googleCredential);
 
             //return client.GetOrCreateTableAsync(datasetId, tableId, tableSchema, null, new CreateTableOptions() { TimePartitioning = new TimePartitioning() { Type = "DAY" } }, cancellationToken)
             //            .ContinueWith((createTableTask) => {
             //                return client.GetTableAsync(datasetId, $"{tableId}${date:yyyyMMdd}", null, cancellationToken);
             //            }, cancellationToken).Unwrap();
-            return client.GetTableAsync(datasetId, $"{tableId}${date:yyyyMMdd}", null, cancellationToken);
-
+            return client.GetTableAsync(googleBigQueryAttribute.DatasetId, $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}", null, cancellationToken);
         }
 
         public Task InsertRowsAsync(DateTime date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken) {

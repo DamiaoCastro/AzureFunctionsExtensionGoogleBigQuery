@@ -10,6 +10,9 @@
     <ProjectReference Include="..\AzureFunctions.Extensions.GoogleBigQuery\AzureFunctions.Extensions.GoogleBigQuery.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="credencials.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -15,13 +15,14 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.DemoProject1 {
 
         }
 
+        [Disable]
         [FunctionName("Function1")]
         public static void Run(
             [TimerTrigger("0 */5 * * * *")]TimerInfo myTimer,
             [GoogleBigQuery("credencials.json", "projectId", "datasetId","tableId")]
                 ICollector<MyBigQueryRow> rows) {
             
-            rows.Add(new MyBigQueryRow(DateTime.UtcNow, "insertId") { SomeIntegerValue = 1 });
+            rows.Add(new MyBigQueryRow(DateTime.UtcNow, "insertId1") { SomeIntegerValue = 1 });
 
         }
 

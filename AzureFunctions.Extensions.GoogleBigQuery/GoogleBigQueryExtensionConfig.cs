@@ -49,21 +49,16 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
                 if (items.Count > 0) {
 
-                    byte[] credentials = null;
-                    if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
-                        var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
-                        var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
-                        credentials = System.IO.File.ReadAllBytes(fullPath);
-                    }
+                    //byte[] credentials = null;
+                    //if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
+                    //    var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
+                    //    var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
+                    //    credentials = System.IO.File.ReadAllBytes(fullPath);
+                    //}
 
                     Type itemType = items.First().GetType();
 
-                    var bqService =
-                        new BigQueryService(credentials,
-                            googleBigQueryAttribute.ProjectId,
-                            googleBigQueryAttribute.DatasetId,
-                            googleBigQueryAttribute.TableId,
-                            itemType);
+                    var bqService = new BigQueryService(googleBigQueryAttribute, itemType);
 
                     var groups = items.GroupBy(c => c.Date.Date);
                     foreach (var group in groups) {
