@@ -20,20 +20,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
         }
 
-        private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken) {
-
-            GoogleCredential googleCredential = null;
-            if (googleBigQueryAttribute.Credentials != null) {
-                googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(googleBigQueryAttribute.Credentials));
-            } else {
-                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
-                    var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
-                    var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
-                    var credentials = System.IO.File.ReadAllBytes(fullPath);
-                    googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
-                }
-            }
-            var client = BigQueryClient.Create(googleBigQueryAttribute.ProjectId, googleCredential);
+        private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken)
+        {
+            BigQueryClient client = GetClient();
 
             //return client.GetOrCreateTableAsync(datasetId, tableId, tableSchema, null, new CreateTableOptions() { TimePartitioning = new TimePartitioning() { Type = "DAY" } }, cancellationToken)
             //            .ContinueWith((createTableTask) => {
@@ -42,27 +31,66 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             return client.GetTableAsync(googleBigQueryAttribute.DatasetId, $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}", null, cancellationToken);
         }
 
+        private BigQueryClient GetClient()
+        {
+            GoogleCredential googleCredential = null;
+            if (googleBigQueryAttribute.Credentials != null)
+            {
+                googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(googleBigQueryAttribute.Credentials));
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName))
+                {
+                    var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
+                    var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
+                    var credentials = System.IO.File.ReadAllBytes(fullPath);
+                    googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
+                }
+            }
+            var client = BigQueryClient.Create(googleBigQueryAttribute.ProjectId, googleCredential);
+            return client;
+        }
+
         public Task InsertRowsAsync(DateTime date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken) {
 
             if (rows != null && rows.Count() > 0) {
                 int dateDiff = (date - DateTime.UtcNow.Date).Days;
 
-                if (dateDiff >= -31 && dateDiff <= 16) {
+                if (dateDiff >= -31 && dateDiff <= 16)
+                {
 
                     var bigQueryRows = rows.Select(c => BigQueryInsertRowService.GetBigQueryInsertRow(c, dictionaryOfProperties));
 
                     return GetTable(date, cancellationToken)
-                        .ContinueWith((tableTask) => {
+                        .ContinueWith((tableTask) =>
+                        {
                             BigQueryTable table = tableTask.Result;
 
                             return table.InsertRowsAsync(bigQueryRows, new InsertOptions() { AllowUnknownFields = true }, cancellationToken)
-                                        .ContinueWith((insertRowsTask) => {
-                                            if (insertRowsTask.IsFaulted) {
+                                        .ContinueWith((insertRowsTask) =>
+                                        {
+                                            if (insertRowsTask.IsFaulted)
+                                            {
                                                 throw insertRowsTask.Exception.InnerExceptions.First();
                                             }
                                         });
                         }, cancellationToken).Unwrap();
 
+                }
+                else {
+
+                    BigQueryClient client = GetClient();
+
+                    IEnumerable<string> lines = BigQueryInsertRowService.GetBigQueryJobLines(rows);
+
+                    return client.UploadJsonAsync(
+                            googleBigQueryAttribute.DatasetId,
+                            $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}",
+                            tableSchema,
+                            lines,
+                            new UploadJsonOptions() { AllowUnknownFields = true },
+                            cancellationToken);
                 }
             }
 

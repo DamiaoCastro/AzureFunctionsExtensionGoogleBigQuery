@@ -1,16 +1,17 @@
 ﻿using Google.Cloud.BigQuery.V2;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
-    public class BigQueryInsertRowService {
+    internal class BigQueryInsertRowService {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
         private static System.Globalization.CultureInfo cultureUS = new System.Globalization.CultureInfo("en-US");
 
-        public static BigQueryInsertRow GetBigQueryInsertRow(GoogleBigQueryRow row, IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties) {
+        internal static BigQueryInsertRow GetBigQueryInsertRow(GoogleBigQueryRow row, IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties) {
             if (row == null) { throw new System.ArgumentNullException(nameof(row)); }
             if (dictionaryOfProperties == null) { throw new System.ArgumentNullException(nameof(dictionaryOfProperties)); }
 
@@ -133,6 +134,18 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                         return i;
                     }
             }
+        }
+
+        internal static IEnumerable<string> GetBigQueryJobLines(IEnumerable<GoogleBigQueryRow> rows)
+        {
+
+            var jsonSerializerSettings = new JsonSerializerSettings()
+            {
+                DateFormatString = BigQueryDateTimeFormat,
+                Culture = cultureUS
+            };
+
+            return rows.Select(r => JsonConvert.SerializeObject(r, jsonSerializerSettings));
         }
 
         private static BigQueryInsertRow[] GetSubEntitiesBigQueryInsertRows(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, IEnumerable<object> objs) {
