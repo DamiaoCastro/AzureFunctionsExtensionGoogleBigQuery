@@ -17,10 +17,12 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, Type itemType) {
             this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
-            (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
+            if (itemType != null) {
+                (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
+            }
         }
 
-        public Task CreateTable(bool timePartitioning, CancellationToken cancellationToken) {
+        public Task CreateTableAsync(bool timePartitioning, CancellationToken cancellationToken) {
 
             BigQueryClient client = GetBiqQueryClient();
 
@@ -34,19 +36,27 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         }
 
-        public Task DeleteTable(CancellationToken cancellationToken) {
+        public Task DeleteTableAsync(CancellationToken cancellationToken) {
+            return DeleteTableAsync(googleBigQueryAttribute.DatasetId, googleBigQueryAttribute.TableId, cancellationToken);
+        }
+
+        public Task DeleteTableAsync(string tableId, CancellationToken cancellationToken) {
+            return DeleteTableAsync(googleBigQueryAttribute.DatasetId, tableId, cancellationToken);
+        }
+
+        public Task DeleteTableAsync(string datasetId, string tableId, CancellationToken cancellationToken) {
 
             BigQueryClient client = GetBiqQueryClient();
 
             return client.DeleteTableAsync(
-                    googleBigQueryAttribute.DatasetId,
-                    googleBigQueryAttribute.TableId,
+                    datasetId,
+                    tableId,
                     null,
                     cancellationToken);
 
         }
 
-        private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken) {
+        private Task<BigQueryTable> GetTableAsync(DateTime date, CancellationToken cancellationToken) {
             BigQueryClient client = GetBiqQueryClient();
 
             return client.GetTableAsync(googleBigQueryAttribute.DatasetId, $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}", null, cancellationToken);
@@ -73,28 +83,23 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             if (rows != null && rows.Count() > 0) {
                 int dateDiff = (date - DateTime.UtcNow.Date).Days;
 
-                if (dateDiff >= -31 && dateDiff <= 16)
-                {
+                if (dateDiff >= -31 && dateDiff <= 16) {
 
                     var bigQueryRows = rows.Select(c => BigQueryInsertRowService.GetBigQueryInsertRow(c, dictionaryOfProperties));
 
-                    return GetTable(date, cancellationToken)
-                        .ContinueWith((tableTask) =>
-                        {
+                    return GetTableAsync(date, cancellationToken)
+                        .ContinueWith((tableTask) => {
                             BigQueryTable table = tableTask.Result;
 
                             return table.InsertRowsAsync(bigQueryRows, new InsertOptions() { AllowUnknownFields = true }, cancellationToken)
-                                        .ContinueWith((insertRowsTask) =>
-                                        {
-                                            if (insertRowsTask.IsFaulted)
-                                            {
+                                        .ContinueWith((insertRowsTask) => {
+                                            if (insertRowsTask.IsFaulted) {
                                                 throw insertRowsTask.Exception.InnerExceptions.First();
                                             }
                                         });
                         }, cancellationToken).Unwrap();
 
-                }
-                else {
+                } else {
 
                     BigQueryClient client = GetBiqQueryClient();
 
