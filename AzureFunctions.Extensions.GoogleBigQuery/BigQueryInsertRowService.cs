@@ -5,13 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery {
-    internal class BigQueryInsertRowService {
+namespace AzureFunctions.Extensions.GoogleBigQuery
+{
+    internal class BigQueryInsertRowService
+    {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
         private static System.Globalization.CultureInfo cultureUS = new System.Globalization.CultureInfo("en-US");
 
-        internal static BigQueryInsertRow GetBigQueryInsertRow(GoogleBigQueryRow row, IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties) {
+        internal static BigQueryInsertRow GetBigQueryInsertRow(GoogleBigQueryRow row, IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties)
+        {
             if (row == null) { throw new System.ArgumentNullException(nameof(row)); }
             if (dictionaryOfProperties == null) { throw new System.ArgumentNullException(nameof(dictionaryOfProperties)); }
 
@@ -20,7 +23,8 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             return new BigQueryInsertRow(row.InsertId) { dic };
         }
 
-        private static IDictionary<string, object> GetDictionaryOfValues(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, object obj) {
+        private static IDictionary<string, object> GetDictionaryOfValues(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, object obj)
+        {
             if (obj == null) { return null; }
 
             var properties = dictionaryOfProperties[obj.GetType().FullName];
@@ -29,29 +33,41 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             return dictionaryOfValues;
         }
 
-        private static object GetBigQueryValue(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, PropertyInfo property, object obj) {
-            switch (property.PropertyType.Name.ToUpper()) {
+        private static object GetBigQueryValue(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, PropertyInfo property, object obj)
+        {
+            switch (property.PropertyType.Name.ToUpper())
+            {
                 case "IENUMERABLE`1":
                     return GetArrayFromEnumreable(dictionaryOfProperties, property, obj);
                 case "NULLABLE`1":
                     var value = property.GetValue(obj);
-                    if (value == null) {
+                    if (value == null)
+                    {
                         return null;
-                    } else {
+                    }
+                    else
+                    {
                         var propertyTypeName = property.PropertyType.GenericTypeArguments[0].Name;
                         return GetNonEnumerableBigQueryValue(propertyTypeName, value);
                     }
             }
 
-            if (property.PropertyType.IsClass && property.PropertyType.Namespace != "System") {//crappy but works for now
-                if (property.PropertyType.IsArray) {
+            if (property.PropertyType.IsClass && property.PropertyType.Namespace != "System")
+            {//crappy but works for now
+                if (property.PropertyType.IsArray)
+                {
                     var array = (IEnumerable<object>)property.GetValue(obj);
                     return GetSubEntitiesBigQueryInsertRows(dictionaryOfProperties, array);
-                } else {
+                }
+                else
+                {
                     var value = property.GetValue(obj);
-                    if (value == null) {
+                    if (value == null)
+                    {
                         return null;
-                    } else {
+                    }
+                    else
+                    {
                         return GetSubEntitiesBigQueryInsertRows(dictionaryOfProperties, new List<object> { value }).First();
                     }
                 }
@@ -60,8 +76,10 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             return GetNonEnumerableBigQueryValue(property.PropertyType.Name, property.GetValue(obj));
         }
 
-        private static object GetNonEnumerableBigQueryValue(string propertyTypeName, object value) {
-            switch (propertyTypeName.ToUpper()) {
+        private static object GetNonEnumerableBigQueryValue(string propertyTypeName, object value)
+        {
+            switch (propertyTypeName.ToUpper())
+            {
                 case "BYTE":
                     return (int)(byte)value;
                 case "CHAR":
@@ -83,11 +101,13 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             }
         }
 
-        private static object GetArrayFromEnumreable(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, PropertyInfo property, object obj) {
+        private static object GetArrayFromEnumreable(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, PropertyInfo property, object obj)
+        {
             var enumerableValue = property.GetValue(obj);
 
             Type innerPropertyType = property.PropertyType.GenericTypeArguments[0];
-            switch (innerPropertyType.Name.ToUpper()) {
+            switch (innerPropertyType.Name.ToUpper())
+            {
                 case "BYTE":
                     return (byte[])enumerableValue;
                 case "BOOLEAN":
@@ -99,9 +119,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 case "DATETIMEOFFSET":
                     return (DateTimeOffset[])enumerableValue;
                 case "DOUBLE":
-                    return ((double[])enumerableValue).Select(c => (float)c).ToArray();
+                    return ((IEnumerable<double>)enumerableValue).Select(c => (float)c).ToArray();
                 case "DECIMAL":
-                    return ((decimal[])enumerableValue).Select(c => (float)c).ToArray();
+                    return ((IEnumerable<decimal>)enumerableValue).Select(c => (float)c).ToArray();
                 case "SINGLE":
                     return ((float[])enumerableValue);
                 case "GUID":
@@ -120,14 +140,18 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 case "UINT64":
                     return ((UInt64[])enumerableValue);
                 default:
-                    if (property.PropertyType.IsArray) {
+                    if (property.PropertyType.IsArray)
+                    {
                         return enumerableValue;
                     }
 
                     IEnumerable<object> ie = (IEnumerable<object>)enumerableValue;
-                    if (innerPropertyType.IsClass && innerPropertyType.Namespace != "System") {
+                    if (innerPropertyType.IsClass && innerPropertyType.Namespace != "System")
+                    {
                         return GetSubEntitiesBigQueryInsertRows(dictionaryOfProperties, ie);
-                    } else {
+                    }
+                    else
+                    {
                         var length = ie.Count();
                         var i = Array.CreateInstance(innerPropertyType, length);
                         Array.Copy(ie.ToArray(), i, length);
@@ -148,9 +172,11 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             return rows.Select(r => JsonConvert.SerializeObject(r, jsonSerializerSettings));
         }
 
-        private static BigQueryInsertRow[] GetSubEntitiesBigQueryInsertRows(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, IEnumerable<object> objs) {
+        private static BigQueryInsertRow[] GetSubEntitiesBigQueryInsertRows(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, IEnumerable<object> objs)
+        {
 
-            if (objs.Count() > 0) {
+            if (objs.Count() > 0)
+            {
                 return objs.Select(c => new BigQueryInsertRow() { GetDictionaryOfValues(dictionaryOfProperties, c) }).ToArray();
             }
 
