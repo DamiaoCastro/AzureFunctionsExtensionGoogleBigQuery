@@ -7,20 +7,24 @@ using Google.Apis.Bigquery.v2.Data;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery {
+namespace AzureFunctions.Extensions.GoogleBigQuery
+{
 
-    public class BigQueryService {
+    public class BigQueryService
+    {
 
         private readonly GoogleBigQueryAttribute googleBigQueryAttribute;
         private readonly TableSchema tableSchema;
         private readonly IDictionary<string, IEnumerable<System.Reflection.PropertyInfo>> dictionaryOfProperties;
 
-        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, Type itemType) {
+        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, Type itemType)
+        {
             this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
             (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
         }
 
-        public Task CreateTable(bool timePartitioning, CancellationToken cancellationToken) {
+        public Task CreateTable(bool timePartitioning, CancellationToken cancellationToken)
+        {
 
             BigQueryClient client = GetBiqQueryClient();
 
@@ -34,7 +38,8 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         }
 
-        public Task DeleteTable(CancellationToken cancellationToken) {
+        public Task DeleteTable(CancellationToken cancellationToken)
+        {
 
             BigQueryClient client = GetBiqQueryClient();
 
@@ -46,31 +51,44 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         }
 
-        private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken) {
+        private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken)
+        {
             BigQueryClient client = GetBiqQueryClient();
 
             return client.GetTableAsync(googleBigQueryAttribute.DatasetId, $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}", null, cancellationToken);
         }
 
-        private BigQueryClient GetBiqQueryClient() {
+        private static BigQueryClient _client = null;
+
+        private BigQueryClient GetBiqQueryClient()
+        {
+
+            if (_client != null) { return _client; }
+
             GoogleCredential googleCredential = null;
-            if (googleBigQueryAttribute.Credentials != null) {
+            if (googleBigQueryAttribute.Credentials != null)
+            {
                 googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(googleBigQueryAttribute.Credentials));
-            } else {
-                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName))
+                {
                     var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
                     var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
                     var credentials = System.IO.File.ReadAllBytes(fullPath);
                     googleCredential = GoogleCredential.FromStream(new System.IO.MemoryStream(credentials));
                 }
             }
-            var client = BigQueryClient.Create(googleBigQueryAttribute.ProjectId, googleCredential);
-            return client;
+            _client = BigQueryClient.Create(googleBigQueryAttribute.ProjectId, googleCredential);
+            return _client;
         }
 
-        public Task InsertRowsAsync(DateTime date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken) {
+        public Task InsertRowsAsync(DateTime date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken)
+        {
 
-            if (rows != null && rows.Count() > 0) {
+            if (rows != null && rows.Count() > 0)
+            {
                 int dateDiff = (date - DateTime.UtcNow.Date).Days;
 
                 if (dateDiff >= -31 && dateDiff <= 16)
@@ -94,19 +112,22 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                         }, cancellationToken).Unwrap();
 
                 }
-                else {
+                else
+                {
 
-                    BigQueryClient client = GetBiqQueryClient();
+                    //throw new Exception("BQ streaming API doesn't allow to write data 31 days to de past and 16 for tthe future in day partitioned tables.");
 
-                    IEnumerable<string> lines = BigQueryInsertRowService.GetBigQueryJobLines(rows);
+                    //BigQueryClient client = GetBiqQueryClient();
 
-                    return client.UploadJsonAsync(
-                            googleBigQueryAttribute.DatasetId,
-                            $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}",
-                            tableSchema,
-                            lines,
-                            new UploadJsonOptions() { AllowUnknownFields = true },
-                            cancellationToken);
+                    //IEnumerable<string> lines = BigQueryInsertRowService.GetBigQueryJobLines(rows);
+
+                    //return client.UploadJsonAsync(
+                    //        googleBigQueryAttribute.DatasetId,
+                    //        $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}",
+                    //        tableSchema,
+                    //        lines,
+                    //        new UploadJsonOptions() { AllowUnknownFields = true },
+                    //        cancellationToken);
                 }
             }
 
