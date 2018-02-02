@@ -20,7 +20,15 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
 
             IDictionary<string, object> dic = GetDictionaryOfValues(dictionaryOfProperties, row);
 
-            return new BigQueryInsertRow(row.InsertId) { dic };
+            if (string.IsNullOrWhiteSpace(row.InsertId))
+            {
+                return new BigQueryInsertRow() { dic };
+            }
+            else
+            {
+                return new BigQueryInsertRow(row.InsertId) { dic };
+            }
+
         }
 
         private static IDictionary<string, object> GetDictionaryOfValues(IDictionary<string, IEnumerable<PropertyInfo>> dictionaryOfProperties, object obj)

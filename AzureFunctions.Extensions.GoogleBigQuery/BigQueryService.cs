@@ -149,19 +149,19 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
             return Task.CompletedTask;
         }
 
-        public async Task InsertRowsAsync(IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken)
+        public Task InsertRowsAsync(IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken)
         {
 
             if (rows != null && rows.Count() > 0)
             {
 
-                await GetTableAsync(cancellationToken)
+                return GetTableAsync(cancellationToken)
                     .ContinueWith((tableTask) =>
                     {
                         BigQueryTable table = tableTask.Result;
                         
                         var bigQueryRows = rows.Select(c => BigQueryInsertRowService.GetBigQueryInsertRow(c, dictionaryOfProperties)).ToArray();
-                        
+
                         return table.InsertRowsAsync(bigQueryRows, new InsertOptions() { AllowUnknownFields = false }, cancellationToken)
                                     .ContinueWith((insertRowsTask) =>
                                     {
@@ -174,7 +174,8 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
 
             }
 
-            //return Task.CompletedTask;
+            return Task.CompletedTask;
         }
+
     }
 }

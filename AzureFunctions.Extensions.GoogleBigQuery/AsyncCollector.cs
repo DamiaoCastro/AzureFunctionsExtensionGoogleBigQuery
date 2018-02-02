@@ -62,7 +62,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
 
                     //items with date
                     {
-                        var groups = items.Where(c=> c.Date.HasValue).GroupBy(c => c.Date.Value.Date);
+                        var groups = items.Where(c => c.Date.HasValue).GroupBy(c => c.Date.Value.Date);
                         foreach (var group in groups)
                         {
                             tasks.Add(bqService.InsertRowsAsync(group.Key, group, cancellationToken));
@@ -71,7 +71,14 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
 
                 }
 
-                return Task.WhenAll(tasks);
+                return Task.WhenAll(tasks)
+                    .ContinueWith((allTasks) =>
+                    {
+                        if (allTasks.IsFaulted)
+                        {
+                            throw allTasks.Exception.InnerException;
+                        }
+                    });
             }
 
         }
