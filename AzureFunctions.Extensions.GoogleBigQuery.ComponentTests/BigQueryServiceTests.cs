@@ -52,7 +52,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.ComponentTests {
             };
 
             //Act
-            await bigQueryService.InsertRowsAsync(testBigQueryRow.Date, new TestBigQueryRow[] { testBigQueryRow }, CancellationToken.None);
+            await bigQueryService.InsertRowsAsync(testBigQueryRow.Date.Value, new TestBigQueryRow[] { testBigQueryRow }, CancellationToken.None);
 
             //Assert
 
@@ -100,7 +100,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.ComponentTests {
             };
 
             //Act
-            await bigQueryService.InsertRowsAsync(testBigQueryRow.Date, new TestBigQueryRow[] { testBigQueryRow }, CancellationToken.None);
+            await bigQueryService.InsertRowsAsync(testBigQueryRow.Date.Value, new TestBigQueryRow[] { testBigQueryRow }, CancellationToken.None);
 
             //Assert
 
