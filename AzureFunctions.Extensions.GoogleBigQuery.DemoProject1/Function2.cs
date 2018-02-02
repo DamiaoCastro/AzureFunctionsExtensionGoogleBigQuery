@@ -17,6 +17,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.DemoProject1 {
 
         }
 
+        [Disable]
         [FunctionName("Function2")]
         public static void Run([TimerTrigger("0 */5 * * * *", RunOnStartup = true)]TimerInfo myTimer,
             [GoogleBigQuery("MyGoogleBigQueryConfig2")]

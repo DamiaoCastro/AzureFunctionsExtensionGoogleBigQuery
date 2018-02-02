@@ -20,42 +20,70 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
         public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, Type itemType)
         {
             this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
-            (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
+            if (itemType != null)
+            {
+                (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
+            }
         }
 
-        public Task CreateTable(bool timePartitioning, CancellationToken cancellationToken)
+        public Task CreateTableAsync(bool timePartitioning, CancellationToken cancellationToken)
         {
 
             BigQueryClient client = GetBiqQueryClient();
 
             return client.GetOrCreateTableAsync(
-                    googleBigQueryAttribute.DatasetId,
-                    googleBigQueryAttribute.TableId,
-                    tableSchema,
-                    null,
-                    timePartitioning ? new CreateTableOptions() { TimePartitioning = new TimePartitioning() { Type = "DAY" } } : null,
-                    cancellationToken);
+                        googleBigQueryAttribute.DatasetId,
+                        googleBigQueryAttribute.TableId,
+                        tableSchema,
+                        null,
+                        timePartitioning ? new CreateTableOptions() { TimePartitioning = new TimePartitioning() { Type = "DAY" } } : null,
+                        cancellationToken)
+                    .ContinueWith((getOrCreateTableTask) => {
+
+                        if (getOrCreateTableTask.IsFaulted) {
+
+                            throw getOrCreateTableTask.Exception.GetBaseException();
+                        }
+
+                    });
 
         }
 
-        public Task DeleteTable(CancellationToken cancellationToken)
+        public Task DeleteTableAsync(CancellationToken cancellationToken)
+        {
+            return DeleteTableAsync(googleBigQueryAttribute.DatasetId, googleBigQueryAttribute.TableId, cancellationToken);
+        }
+
+        public Task DeleteTableAsync(string tableId, CancellationToken cancellationToken)
+        {
+            return DeleteTableAsync(googleBigQueryAttribute.DatasetId, tableId, cancellationToken);
+        }
+
+        public Task DeleteTableAsync(string datasetId, string tableId, CancellationToken cancellationToken)
         {
 
             BigQueryClient client = GetBiqQueryClient();
 
             return client.DeleteTableAsync(
-                    googleBigQueryAttribute.DatasetId,
-                    googleBigQueryAttribute.TableId,
+                    datasetId,
+                    tableId,
                     null,
                     cancellationToken);
 
         }
 
-        private Task<BigQueryTable> GetTable(DateTime date, CancellationToken cancellationToken)
+        private Task<BigQueryTable> GetTableAsync(DateTime date, CancellationToken cancellationToken)
         {
             BigQueryClient client = GetBiqQueryClient();
 
             return client.GetTableAsync(googleBigQueryAttribute.DatasetId, $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}", null, cancellationToken);
+        }
+
+        private Task<BigQueryTable> GetTableAsync(CancellationToken cancellationToken)
+        {
+            BigQueryClient client = GetBiqQueryClient();
+
+            return client.GetTableAsync(googleBigQueryAttribute.DatasetId, googleBigQueryAttribute.TableId, null, cancellationToken);
         }
 
         private static BigQueryClient _client = null;
@@ -96,7 +124,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
 
                     var bigQueryRows = rows.Select(c => BigQueryInsertRowService.GetBigQueryInsertRow(c, dictionaryOfProperties));
 
-                    return GetTable(date, cancellationToken)
+                    return GetTableAsync(date, cancellationToken)
                         .ContinueWith((tableTask) =>
                         {
                             BigQueryTable table = tableTask.Result;
@@ -114,24 +142,39 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
                 }
                 else
                 {
-
-                    //throw new Exception("BQ streaming API doesn't allow to write data 31 days to de past and 16 for tthe future in day partitioned tables.");
-
-                    //BigQueryClient client = GetBiqQueryClient();
-
-                    //IEnumerable<string> lines = BigQueryInsertRowService.GetBigQueryJobLines(rows);
-
-                    //return client.UploadJsonAsync(
-                    //        googleBigQueryAttribute.DatasetId,
-                    //        $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}",
-                    //        tableSchema,
-                    //        lines,
-                    //        new UploadJsonOptions() { AllowUnknownFields = true },
-                    //        cancellationToken);
+                    throw new ArgumentOutOfRangeException("BigQuery streamming API don't allow to write data in DAY partioned tabled outside 31 days in the past and 16 days in the future.");
                 }
             }
 
-            return Task.WhenAll();
+            return Task.CompletedTask;
+        }
+
+        public Task InsertRowsAsync(IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken)
+        {
+
+            if (rows != null && rows.Count() > 0)
+            {
+
+                return GetTableAsync(cancellationToken)
+                    .ContinueWith((tableTask) =>
+                    {
+                        BigQueryTable table = tableTask.Result;
+                        
+                        var bigQueryRows = rows.Select(c => BigQueryInsertRowService.GetBigQueryInsertRow(c, dictionaryOfProperties)).ToArray();
+
+                        return table.InsertRowsAsync(bigQueryRows, new InsertOptions() { AllowUnknownFields = false }, cancellationToken)
+                                    .ContinueWith((insertRowsTask) =>
+                                    {
+                                        if (insertRowsTask.IsFaulted)
+                                        {
+                                            throw insertRowsTask.Exception.InnerExceptions.First();
+                                        }
+                                    });
+                    }, cancellationToken).Unwrap();
+
+            }
+
+            return Task.CompletedTask;
         }
 
     }
