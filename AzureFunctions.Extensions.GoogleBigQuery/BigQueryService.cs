@@ -135,7 +135,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                     new TableDataInsertAllRequest() {
                         ignoreUnknownValues = true,
                         rows = rows.Select(c => new TableDataInsertAllRequest.Row() { insertId = c.__InsertId, json = c })
-                    }, cancellationToken);
+                    },
+                    settings,
+                    cancellationToken);
 
                 return insertAllTask;
             }
