@@ -4,12 +4,14 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
     public class GoogleBigQueryRow {
 
         public GoogleBigQueryRow(DateTime? date, string insertId) {
-            Date = date;
-            InsertId = insertId;
+            __Date = date;
+            __InsertId = insertId;
         }
 
-        public DateTime? Date { get; }
-        public string InsertId { get; }
+        [Newtonsoft.Json.JsonIgnore]
+        public DateTime? __Date { get; }
+        [Newtonsoft.Json.JsonIgnore]
+        public string __InsertId { get; }
 
     }
 }

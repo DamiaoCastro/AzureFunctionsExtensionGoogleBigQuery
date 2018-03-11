@@ -20,12 +20,12 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.DemoProject1 {
         }
 
         [FunctionName("Function5")]
-        public static Task Run(
+        public static void Run(
             [TimerTrigger("0 */1 * * * *", RunOnStartup = true)]TimerInfo myTimer,
             [GoogleBigQueryManagement("MyGoogleBigQueryConfig4")] GoogleBigQueryManagement management,
             CancellationToken cancellationToken) {
 
-            return management.CreateTableAsync<MyBigQueryRow>(true, cancellationToken);
+            //return management.CreateTableAsync<MyBigQueryRow>(true, cancellationToken);
             //return management.DeleteTableAsync("table2$20180113", cancellationToken);
 
         }
