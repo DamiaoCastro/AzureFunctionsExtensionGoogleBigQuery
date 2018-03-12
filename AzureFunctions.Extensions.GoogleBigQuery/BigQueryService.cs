@@ -70,18 +70,6 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         //}
 
-        //private Task<BigQueryTable> GetTableAsync(DateTime date, CancellationToken cancellationToken) {
-        //    BigQueryClient client = GetBiqQueryClient();
-
-        //    return client.GetTableAsync(googleBigQueryAttribute.DatasetId, $"{googleBigQueryAttribute.TableId}${date:yyyyMMdd}", null, cancellationToken);
-        //}
-
-        //private Task<BigQueryTable> GetTableAsync(CancellationToken cancellationToken) {
-        //    BigQueryClient client = GetBiqQueryClient();
-
-        //    return client.GetTableAsync(googleBigQueryAttribute.DatasetId, googleBigQueryAttribute.TableId, null, cancellationToken);
-        //}
-
         private static Tabledata _client = null;
 
         private Tabledata GetBiqQueryClient() {
@@ -106,20 +94,6 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
         public Task<BaseResponse<TableDataInsertAllResponse>> InsertRowsAsync(DateTime? date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken) {
 
             if (rows != null && rows.Count() > 0) {
-
-                //var bigQueryRows = rows.Select(c => BigQueryInsertRowService.GetBigQueryInsertRow(c, dictionaryOfProperties));
-
-                //return GetTableAsync(date, cancellationToken)
-                //    .ContinueWith((tableTask) => {
-                //        BigQueryTable table = tableTask.Result;
-
-                //        return table.InsertRowsAsync(bigQueryRows, new InsertOptions() { AllowUnknownFields = true }, cancellationToken)
-                //                    .ContinueWith((insertRowsTask) => {
-                //                        if (insertRowsTask.IsFaulted) {
-                //                            throw insertRowsTask.Exception.InnerExceptions.First();
-                //                        }
-                //                    });
-                //    }, cancellationToken).Unwrap();
 
                 string tableName = googleBigQueryAttribute.TableId;
                 if (date.HasValue) {

@@ -10,18 +10,19 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             this.googleBigQueryManagementAttribute = googleBigQueryManagementAttribute;
         }
 
-        //public Task DeleteTableAsync(string tableName, CancellationToken cancellationToken) {
+        public Task DeleteTableAsync(string tableName, CancellationToken cancellationToken) {
+            //var service = new BigQueryService(googleBigQueryManagementAttribute, null);
+            //return service.DeleteTableAsync(tableName, cancellationToken);
 
-        //    var service = new BigQueryService(googleBigQueryManagementAttribute, null);
+            throw new NotImplementedException();
+        }
 
-        //    return service.DeleteTableAsync(tableName, cancellationToken);
+        public Task CreateTableAsync<T>(bool timePartitioning, CancellationToken cancellationToken) {
+            //var service = new BigQueryService(googleBigQueryManagementAttribute, typeof(T));
+            //return service.CreateTableAsync(timePartitioning, cancellationToken);
 
-        //}
-
-        //public Task CreateTableAsync<T>(bool timePartitioning, CancellationToken cancellationToken) {
-        //    var service = new BigQueryService(googleBigQueryManagementAttribute, typeof(T));
-        //    return service.CreateTableAsync(timePartitioning, cancellationToken);
-        //}
+            throw new NotImplementedException();
+        }
 
     }
 }
