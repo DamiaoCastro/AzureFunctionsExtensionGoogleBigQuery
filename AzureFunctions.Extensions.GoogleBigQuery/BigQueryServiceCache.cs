@@ -16,7 +16,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery
             {
                 var expiringBigQueryService = publisherClientCache[key];
                 if ((DateTime.UtcNow - expiringBigQueryService.CreatedUtc).TotalHours > 1) {
-                    var bigQueryService = new BigQueryService(googleBigQueryAttribute/*, itemType*/);
+                    var bigQueryService = new BigQueryService(googleBigQueryAttribute);
                     var expiringBigQueryService1 = new ExpiringBigQueryService(DateTime.UtcNow, bigQueryService);
                     publisherClientCache.AddOrUpdate(key, expiringBigQueryService1, (newkey, oldValue) => expiringBigQueryService1);
 

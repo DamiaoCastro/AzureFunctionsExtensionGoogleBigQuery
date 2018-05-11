@@ -1,5 +1,3 @@
-using AzureFunctions.Extensions.GoogleBigQuery.TestsCommon;
-using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
