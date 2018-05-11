@@ -10,7 +10,7 @@ using TransparentApiClient.Google.BigQuery.V2.Schema;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
 
-    public class BigQueryService {
+    internal class BigQueryService {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -51,8 +51,8 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 }
 
                 var settings = new JsonSerializerSettings() { DateFormatString = BigQueryDateTimeFormat };
-                
-                var insertAllTask = GetBiqQueryClient().InsertAllAsync(
+
+                return GetBiqQueryClient().InsertAllAsync(
                     googleBigQueryAttribute.DatasetId,
                     googleBigQueryAttribute.ProjectId,
                     tableName,
@@ -63,7 +63,6 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                     settings,
                     cancellationToken);
 
-                return insertAllTask;
             }
 
             return Task.FromResult<BaseResponse<TableDataInsertAllResponse>>(null);
