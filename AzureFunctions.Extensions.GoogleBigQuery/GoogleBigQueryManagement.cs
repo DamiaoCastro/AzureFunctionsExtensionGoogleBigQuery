@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using TransparentApiClient.Google.BigQuery.V2.Schema;
+using TransparentApiClient.Google.Core;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
     public class GoogleBigQueryManagement {
@@ -24,5 +27,18 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             throw new NotImplementedException();
         }
 
+        public Task QueryAsync(string query, Dictionary<string, string> parameters, CancellationToken cancellationToken)
+        {
+            var service = new BigQueryService(googleBigQueryManagementAttribute);
+
+            return service.QueryAsync(query, parameters, cancellationToken)
+                .ContinueWith((queryTask)=> {
+                    if (!queryTask.IsFaulted)
+                    {
+
+                    }
+                });
+
+        }
     }
 }

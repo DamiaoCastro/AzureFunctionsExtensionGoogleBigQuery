@@ -11,9 +11,11 @@ using Newtonsoft.Json;
 using TransparentApiClient.Google.Core;
 using TransparentApiClient.Google.BigQuery.V2.Schema;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery {
+namespace AzureFunctions.Extensions.GoogleBigQuery
+{
 
-    public class BigQueryService {
+    public class BigQueryService
+    {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -21,11 +23,36 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
         //private readonly TableSchema tableSchema;
         //private readonly IDictionary<string, IEnumerable<System.Reflection.PropertyInfo>> dictionaryOfProperties;
 
-        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute/*, Type itemType*/) {
+        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute/*, Type itemType*/)
+        {
             this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
             //if (itemType != null) {
             //    (this.tableSchema, this.dictionaryOfProperties) = TableSchemaBuilderService.GetTableSchema(itemType);
             //}
+        }
+
+        internal Task<BaseResponse<QueryResponse>> QueryAsync(string query, Dictionary<string, string> parameters, CancellationToken cancellationToken)
+        {
+            var jobsClient = GetBiqQueryJobsClient();
+
+            return jobsClient.QueryAsync(
+                googleBigQueryAttribute.ProjectId,
+                new QueryRequest()
+                {
+                    query = query,
+                    useLegacySql = false,
+                    useQueryCache = false,
+                    parameterMode = "NAMED",
+                    queryParameters = parameters.Select(c => new QueryParameter()
+                    {
+                        name = c.Key,
+                        parameterValue = new QueryParameterValue()
+                        {
+                            value = c.Value
+                        }
+                    })
+                },
+                null, cancellationToken);
         }
 
         //public Task CreateTableAsync(bool timePartitioning, CancellationToken cancellationToken) {
@@ -70,43 +97,67 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         //}
 
-        private static Tabledata _client = null;
+        private static Tabledata _TabledataClient = null;
 
-        private Tabledata GetBiqQueryClient() {
+        private Tabledata GetBiqQueryTabledataClient()
+        {
+            if (_TabledataClient != null) { return _TabledataClient; }
+            byte[] googleCredential = GetCredentials();
+            _TabledataClient = new Tabledata(googleCredential);
+            return _TabledataClient;
+        }
 
-            if (_client != null) { return _client; }
+        private static Jobs _JobsClient = null;
 
+        private Jobs GetBiqQueryJobsClient()
+        {
+            if (_JobsClient != null) { return _JobsClient; }
+            byte[] googleCredential = GetCredentials();
+            _JobsClient = new Jobs(googleCredential);
+            return _JobsClient;
+        }
+
+        private byte[] GetCredentials()
+        {
             byte[] googleCredential = null;
-            if (googleBigQueryAttribute.Credentials != null) {
+            if (googleBigQueryAttribute.Credentials != null)
+            {
                 googleCredential = googleBigQueryAttribute.Credentials;
-            } else {
-                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName))
+                {
                     var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
                     var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
                     var credentials = System.IO.File.ReadAllBytes(fullPath);
                     googleCredential = credentials;
                 }
             }
-            _client = new Tabledata(googleCredential);
-            return _client;
+
+            return googleCredential;
         }
 
-        public Task<BaseResponse<TableDataInsertAllResponse>> InsertRowsAsync(DateTime? date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken) {
+        public Task<BaseResponse<TableDataInsertAllResponse>> InsertRowsAsync(DateTime? date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken)
+        {
 
-            if (rows != null && rows.Count() > 0) {
+            if (rows != null && rows.Count() > 0)
+            {
 
                 string tableName = googleBigQueryAttribute.TableId;
-                if (date.HasValue) {
+                if (date.HasValue)
+                {
                     tableName = $"{googleBigQueryAttribute.TableId}${date.Value:yyyyMMdd}";
                 }
 
                 var settings = new JsonSerializerSettings() { DateFormatString = BigQueryDateTimeFormat };
-                
-                var insertAllTask = GetBiqQueryClient().InsertAllAsync(
+
+                var insertAllTask = GetBiqQueryTabledataClient().InsertAllAsync(
                     googleBigQueryAttribute.DatasetId,
                     googleBigQueryAttribute.ProjectId,
                     tableName,
-                    new TableDataInsertAllRequest() {
+                    new TableDataInsertAllRequest()
+                    {
                         ignoreUnknownValues = true,
                         rows = rows.Select(c => new TableDataInsertAllRequest.Row() { insertId = c.__InsertId, json = c })
                     },
