@@ -41,10 +41,8 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 var tasks = new List<Task<BaseResponse<TableDataInsertAllResponse>>>();
 
                 if (items.Count > 0) {
-
-                    //Type itemType = items.First().GetType();
-
-                    var bqService = new BigQueryService(googleBigQueryAttribute/*, itemType*/);
+                    
+                    var bqService = new BigQueryService(googleBigQueryAttribute);
 
                     //items without date
                     {
