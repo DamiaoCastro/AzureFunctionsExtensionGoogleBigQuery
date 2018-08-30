@@ -33,7 +33,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 }
 
                 items.Add(item);
-                return Task.WhenAll();
+                return Task.CompletedTask;
             }
 
             Task IAsyncCollector<GoogleBigQueryRow>.FlushAsync(CancellationToken cancellationToken) {
