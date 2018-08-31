@@ -47,7 +47,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                     //items without date
                     {
                         var rows = items.Where(c => !c.__Date.HasValue);
-                        tasks.Add(bqService.InsertRowsAsync(null, rows, cancellationToken));
+                        if (rows.Any()) { tasks.Add(bqService.InsertRowsAsync(null, rows, cancellationToken)); }                        
                     }
 
                     //items with date
@@ -61,15 +61,27 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                 }
 
                 return Task.WhenAll(tasks)
-                    .ContinueWith((allTasks) => {
-                        if (allTasks.IsFaulted) {
+                    .ContinueWith((Task<BaseResponse<TableDataInsertAllResponse>[]> allTasks) => {
+                        if (allTasks.IsFaulted)
+                        {
                             throw allTasks.Exception.InnerException;
                         }
+                        else {
+                            var errorResponses = allTasks.Result.Where(c=> c!= null && c.Response.insertErrors != null && c.Response.insertErrors.Any());
+
+                            if (errorResponses.Any()) {
+                                var listErrors = from e in errorResponses
+                                                 from ie in e.Response.insertErrors
+                                                 from le in ie.errors
+                                                 select le.message;
+
+                                throw new Exception("BigQuery insert errors", new Exception(string.Join("\n", listErrors)));
+                            }
+                        }
                     });
+
             }
 
         }
-
     }
-
 }
