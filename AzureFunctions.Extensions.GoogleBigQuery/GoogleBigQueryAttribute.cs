@@ -1,11 +1,12 @@
-﻿using Microsoft.Azure.WebJobs.Description;
+﻿using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Description;
 using System;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
 
     [Binding]
     [AttributeUsage(AttributeTargets.ReturnValue | AttributeTargets.Parameter)]
-    public class GoogleBigQueryAttribute : Attribute {
+    public sealed class GoogleBigQueryAttribute : Attribute {
 
         /// <summary>
         /// Allows to write rows in Google BigQuery 
