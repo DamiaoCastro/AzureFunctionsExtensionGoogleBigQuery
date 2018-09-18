@@ -1,16 +1,18 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery
 {
-    public class GoogleBigQueryRow : IGoogleBigQueryRow
+    public class GoogleBigQueryRowJObject : JObject, IGoogleBigQueryRow
     {
         private DateTime? __Date;
         private string __InsertId;
 
-        public GoogleBigQueryRow(DateTime? date, string insertId)
+        public GoogleBigQueryRowJObject(DateTime? date, string insertId, JObject jObject)
         {
             __Date = date;
             __InsertId = insertId;
+            Add(jObject.Children());
         }
 
         DateTime? IGoogleBigQueryRow.getPartitionDate()

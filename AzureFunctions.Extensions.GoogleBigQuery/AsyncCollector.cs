@@ -46,13 +46,13 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
                     //items without date
                     {
-                        var rows = items.Where(c => !c.__Date.HasValue);
+                        var rows = items.OfType<IGoogleBigQueryRow>().Where(c => !c.getPartitionDate().HasValue);
                         if (rows.Any()) { tasks.Add(bqService.InsertRowsAsync(null, rows, cancellationToken)); }                        
                     }
 
                     //items with date
                     {
-                        var groups = items.Where(c => c.__Date.HasValue).GroupBy(c => c.__Date.Value.Date);
+                        var groups = items.OfType<IGoogleBigQueryRow>().Where(c => c.getPartitionDate().HasValue).GroupBy(c => c.getPartitionDate().Value.Date);
                         foreach (var group in groups) {
                             tasks.Add(bqService.InsertRowsAsync(group.Key, group, cancellationToken));
                         }

@@ -41,7 +41,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             return _client;
         }
 
-        public Task<BaseResponse<TableDataInsertAllResponse>> InsertRowsAsync(DateTime? date, IEnumerable<GoogleBigQueryRow> rows, CancellationToken cancellationToken) {
+        public Task<BaseResponse<TableDataInsertAllResponse>> InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken) {
 
             if (rows != null && rows.Count() > 0) {
 
@@ -58,7 +58,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
                     tableName,
                     new TableDataInsertAllRequest() {
                         ignoreUnknownValues = true,
-                        rows = rows.Select(c => new TableDataInsertAllRequest.Row() { insertId = c.__InsertId, json = c })
+                        rows = rows.Select(c => new TableDataInsertAllRequest.Row() { insertId = c.getInsertId(), json = c })
                     },
                     settings,
                     cancellationToken);
