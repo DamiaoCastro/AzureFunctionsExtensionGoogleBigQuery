@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery {
+namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
+
     internal class BigQueryServiceCache {
 
         private static ConcurrentDictionary<int, ExpiringBigQueryService> publisherClientCache = new ConcurrentDictionary<int, ExpiringBigQueryService>();

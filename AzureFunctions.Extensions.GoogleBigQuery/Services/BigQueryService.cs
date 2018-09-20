@@ -8,9 +8,9 @@ using Newtonsoft.Json;
 using TransparentApiClient.Google.Core;
 using TransparentApiClient.Google.BigQuery.V2.Schema;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery {
+namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
 
-    internal class BigQueryService {
+    public class BigQueryService : IBigQueryService {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -22,7 +22,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
 
         private static Tabledata _client = null;
 
-        private Tabledata GetBiqQueryClient() {
+        private ITabledata GetBiqQueryClient() {
 
             if (_client != null) { return _client; }
 
@@ -41,7 +41,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             return _client;
         }
 
-        public Task<BaseResponse<TableDataInsertAllResponse>> InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken) {
+        Task<BaseResponse<TableDataInsertAllResponse>> IBigQueryService.InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken) {
 
             if (rows != null && rows.Count() > 0) {
 

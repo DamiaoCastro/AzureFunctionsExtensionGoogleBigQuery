@@ -4,17 +4,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests
-{
+namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
 
     [TestClass]
-    public class GoogleBigQueryRowSerializationUnitTests
-    {
+    public class GoogleBigQueryRowSerializationUnitTests {
 
-        public class GoogleBigQueryRowExtended : GoogleBigQueryRow
-        {
-            public GoogleBigQueryRowExtended(DateTime? date, string insertId) : base(date, insertId)
-            {
+        public class GoogleBigQueryRowExtended : GoogleBigQueryRow {
+            public GoogleBigQueryRowExtended(DateTime? date, string insertId) : base(date, insertId) {
             }
 
             [Newtonsoft.Json.JsonProperty]
@@ -24,8 +20,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests
         }
 
         [TestMethod]
-        public void GoogleBigQueryRow_JObject_Serialize()
-        {
+        public void GoogleBigQueryRow_JObject_Serialize() {
 
             //Arrange
             var date = DateTime.UtcNow.Date;
@@ -44,8 +39,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests
         }
 
         [TestMethod]
-        public void GoogleBigQueryRow_Extend_Serialize()
-        {
+        public void GoogleBigQueryRow_Extend_Serialize() {
 
             //Arrange
             var date = DateTime.UtcNow.Date;
