@@ -19,7 +19,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
         }
 
         [TestMethod]
-        public void GoogleBigQueryRow_JObject_Serialize() {
+        public void GoogleBigQueryRowJObject_Serialize() {
 
             //Arrange
             var date = DateTime.UtcNow.Date;

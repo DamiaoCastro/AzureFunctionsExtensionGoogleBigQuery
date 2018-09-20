@@ -1,6 +1,5 @@
 ﻿using AzureFunctions.Extensions.GoogleBigQuery.Bindings;
 using AzureFunctions.Extensions.GoogleBigQuery.Services;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Config;
 using System;

@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery", "AzureFunctions.Extensions.GoogleBigQuery\AzureFunctions.Extensions.GoogleBigQuery.csproj", "{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureFunctions.Extensions.GoogleBigQuery.UnitTests", "AzureFunctions.Extensions.GoogleBigQuery.UnitTests\AzureFunctions.Extensions.GoogleBigQuery.UnitTests.csproj", "{452CBDD6-B6DF-4C80-A76E-8501D98456C8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{82FA71FF-89FB-4975-9801-FBEA4A08C3C3}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -14,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureFunctions.Extensions.GoogleBigQuery.UnitTests", "AzureFunctions.Extensions.GoogleBigQuery.UnitTests\AzureFunctions.Extensions.GoogleBigQuery.UnitTests.csproj", "{C78120E1-475C-4DE9-A861-88E1F1BA8419}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,10 @@ Global
 		{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B781E2D4-4180-4BFA-96F3-EE4CB7E43E0D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{452CBDD6-B6DF-4C80-A76E-8501D98456C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C78120E1-475C-4DE9-A861-88E1F1BA8419}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C78120E1-475C-4DE9-A861-88E1F1BA8419}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C78120E1-475C-4DE9-A861-88E1F1BA8419}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C78120E1-475C-4DE9-A861-88E1F1BA8419}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

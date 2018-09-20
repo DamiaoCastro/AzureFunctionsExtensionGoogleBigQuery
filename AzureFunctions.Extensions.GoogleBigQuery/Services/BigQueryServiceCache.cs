@@ -7,7 +7,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
 
         private static ConcurrentDictionary<int, ExpiringBigQueryService> publisherClientCache = new ConcurrentDictionary<int, ExpiringBigQueryService>();
 
-        public static BigQueryService GetPublisherClient(GoogleBigQueryAttribute googleBigQueryAttribute/*, Type itemType*/) {
+        public static IBigQueryService GetPublisherClient(GoogleBigQueryAttribute googleBigQueryAttribute) {
             var key = $"{googleBigQueryAttribute.GetHashCode()}".GetHashCode();
 
             if (publisherClientCache.ContainsKey(key)) {
@@ -22,7 +22,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
 
                 return expiringBigQueryService.BigQueryService;
             } else {
-                var bigQueryService = new BigQueryService(googleBigQueryAttribute/*, itemType*/);
+                var bigQueryService = new BigQueryService(googleBigQueryAttribute);
                 var expiringBigQueryService = new ExpiringBigQueryService(DateTime.UtcNow, bigQueryService);
                 publisherClientCache.AddOrUpdate(key, expiringBigQueryService, (newkey, oldValue) => expiringBigQueryService);
 
