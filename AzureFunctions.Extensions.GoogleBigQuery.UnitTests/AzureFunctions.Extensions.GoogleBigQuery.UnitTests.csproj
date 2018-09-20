@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AzureFunctions.Extensions.GoogleBigQuery.TestsCommon\AzureFunctions.Extensions.GoogleBigQuery.TestsCommon.csproj" />
     <ProjectReference Include="..\AzureFunctions.Extensions.GoogleBigQuery\AzureFunctions.Extensions.GoogleBigQuery.csproj" />
   </ItemGroup>
 
