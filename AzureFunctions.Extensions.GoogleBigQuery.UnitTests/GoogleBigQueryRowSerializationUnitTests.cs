@@ -1,4 +1,3 @@
-using AzureFunctions.Extensions.GoogleBigQuery.TestsCommon;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
