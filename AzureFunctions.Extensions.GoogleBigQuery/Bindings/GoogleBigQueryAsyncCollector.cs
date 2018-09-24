@@ -12,11 +12,11 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Bindings {
 
     public class GoogleBigQueryAsyncCollector : ICollector<IGoogleBigQueryRow>, IAsyncCollector<IGoogleBigQueryRow> {
 
-        private readonly IBigQueryService bigQueryService;
+        private readonly ITableData bigQueryService;
 
         private List<IGoogleBigQueryRow> items = new List<IGoogleBigQueryRow>();
 
-        public GoogleBigQueryAsyncCollector(IBigQueryService bigQueryService) {
+        public GoogleBigQueryAsyncCollector(ITableData bigQueryService) {
             this.bigQueryService = bigQueryService;
         }
 

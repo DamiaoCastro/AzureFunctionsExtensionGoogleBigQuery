@@ -10,38 +10,19 @@ using TransparentApiClient.Google.BigQuery.V2.Schema;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
 
-    public class BigQueryService : IBigQueryService {
+    public class BigQueryService : ITableData {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
         private readonly GoogleBigQueryAttribute googleBigQueryAttribute;
+        private readonly ITableDataClientCacheService tableDataClientCacheService;
 
-        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute) {
+        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, ITableDataClientCacheService tableDataClientCacheService) {
             this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
+            this.tableDataClientCacheService = tableDataClientCacheService;
         }
 
-        private static Tabledata _client = null;
-
-        private ITabledata GetBiqQueryClient() {
-
-            if (_client != null) { return _client; }
-
-            byte[] googleCredential = null;
-            if (googleBigQueryAttribute.Credentials != null) {
-                googleCredential = googleBigQueryAttribute.Credentials;
-            } else {
-                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
-                    var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
-                    var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
-                    var credentials = System.IO.File.ReadAllBytes(fullPath);
-                    googleCredential = credentials;
-                }
-            }
-            _client = new Tabledata(googleCredential);
-            return _client;
-        }
-
-        Task<BaseResponse<TableDataInsertAllResponse>> IBigQueryService.InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken) {
+        Task<BaseResponse<TableDataInsertAllResponse>> ITableData.InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken) {
 
             if (rows != null && rows.Count() > 0) {
 
@@ -52,7 +33,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
 
                 var settings = new JsonSerializerSettings() { DateFormatString = BigQueryDateTimeFormat };
 
-                return GetBiqQueryClient().InsertAllAsync(
+                ITabledata tabledataClient = tableDataClientCacheService.GetTabledataClient(googleBigQueryAttribute);
+
+                return tabledataClient.InsertAllAsync(
                     googleBigQueryAttribute.DatasetId,
                     googleBigQueryAttribute.ProjectId,
                     tableName,

@@ -6,7 +6,7 @@ using System;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.Config {
 
-    [Extension("GoogleBigQuery")]
+    [Extension("GoogleBigQuery", "GoogleBigQuery")]
     public partial class GoogleBigQueryExtensionConfig : IExtensionConfigProvider {
 
         void IExtensionConfigProvider.Initialize(ExtensionConfigContext context) {
@@ -14,12 +14,15 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Config {
 
             context
                 .AddBindingRule<GoogleBigQueryAttribute>()
-                .BindToCollector(c=> GetGoogleBigQueryAsyncCollector(c));
+                .BindToCollector(c => GetGoogleBigQueryAsyncCollector(c));
 
         }
 
         private GoogleBigQueryAsyncCollector GetGoogleBigQueryAsyncCollector(GoogleBigQueryAttribute googleBigQueryAttribute) {
-            var bigQueryService = new BigQueryService(googleBigQueryAttribute);
+
+            ITableDataClientCacheService tableDataClientCacheService = new TableDataClientCacheService();
+            var bigQueryService = new BigQueryService(googleBigQueryAttribute, tableDataClientCacheService);
+
             return new GoogleBigQueryAsyncCollector(bigQueryService);
         }
 

@@ -18,12 +18,12 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
     [TestClass]
     public class GoogleBigQueryAsyncCollectorUnitTests {
 
-        private Mock<IBigQueryService> bigQueryServiceMock = null;
+        private Mock<ITableData> bigQueryServiceMock = null;
         private ICollector<IGoogleBigQueryRow> objectToTest = null;
 
         [TestInitialize]
         public void Init() {
-            bigQueryServiceMock = new Mock<IBigQueryService>();
+            bigQueryServiceMock = new Mock<ITableData>();
             objectToTest = new GoogleBigQueryAsyncCollector(bigQueryServiceMock.Object);
         }
 
