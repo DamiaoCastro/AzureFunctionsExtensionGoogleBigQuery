@@ -61,6 +61,12 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Bindings {
                     if (allTasks.IsFaulted) {
                         throw allTasks.Exception.InnerException;
                     } else {
+
+                        var qBadRequest = allTasks.Result.Where(c => c.Response == null && c.ResponseCode == System.Net.HttpStatusCode.BadRequest);
+                        if (qBadRequest.Any()) {
+                            throw new Exception(qBadRequest.First().Error.message);
+                        }
+
                         var errorResponses = allTasks.Result.Where(c => c != null && c.Response.insertErrors != null && c.Response.insertErrors.Any());
 
                         if (errorResponses.Any()) {
