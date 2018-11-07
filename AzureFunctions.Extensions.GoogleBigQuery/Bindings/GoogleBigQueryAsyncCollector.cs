@@ -10,6 +10,7 @@ using TransparentApiClient.Google.Core;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.Bindings {
 
+    
     public class GoogleBigQueryAsyncCollector : ICollector<IGoogleBigQueryRow>, IAsyncCollector<IGoogleBigQueryRow> {
 
         private readonly ITableData bigQueryService;

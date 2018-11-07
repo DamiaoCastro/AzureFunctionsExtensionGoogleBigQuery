@@ -1,5 +1,6 @@
 ﻿using AzureFunctions.Extensions.GoogleBigQuery.Bindings;
 using AzureFunctions.Extensions.GoogleBigQuery.Services;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Bindings;
 using Microsoft.Azure.WebJobs.Host.Config;
@@ -17,27 +18,33 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Config {
 
             context
                 .AddBindingRule<GoogleBigQueryAttribute>()
-                .BindToCollector(c => GetGoogleBigQueryAsyncCollector(c));
+                .BindToCollector(c => {
 
-            context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
-                .BindToInput(GetGoogleBigQueryJobInput<IDatasets>);
+                    ITableDataClientCacheService tableDataClientCacheService = new TableDataClientCacheService();
+                    var bigQueryService = new BigQueryService(c, tableDataClientCacheService);
 
-            context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
-                .BindToInput(GetGoogleBigQueryJobInput<IJobs>);
+                    return new GoogleBigQueryAsyncCollector(bigQueryService);
+                });
 
-            context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
-                .BindToInput(GetGoogleBigQueryJobInput<IProjects>);
+            //context
+            //    .AddBindingRule<GoogleBigQueryJobAttribute>()
+            //    .BindToInput(GetGoogleBigQueryJobInput<IDatasets>);
 
-            context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
-                .BindToInput(GetGoogleBigQueryJobInput<ITabledata>);
+            //context
+            //    .AddBindingRule<GoogleBigQueryJobAttribute>()
+            //    .BindToInput(GetGoogleBigQueryJobInput<IJobs>);
 
-            context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
-                .BindToInput(GetGoogleBigQueryJobInput<ITables>);
+            //context
+            //    .AddBindingRule<GoogleBigQueryJobAttribute>()
+            //    .BindToInput(GetGoogleBigQueryJobInput<IProjects>);
+
+            //context
+            //    .AddBindingRule<GoogleBigQueryJobAttribute>()
+            //    .BindToInput(GetGoogleBigQueryJobInput<ITabledata>);
+
+            //context
+            //    .AddBindingRule<GoogleBigQueryJobAttribute>()
+            //    .BindToInput(GetGoogleBigQueryJobInput<ITables>);
 
         }
 
@@ -49,13 +56,13 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Config {
             return new GoogleBigQueryAsyncCollector(bigQueryService);
         }
 
-        private Task<T> GetGoogleBigQueryJobInput<T>(GoogleBigQueryJobAttribute attribute, ValueBindingContext valueBindingContext) where T : class {
+        //private Task<T> GetGoogleBigQueryJobInput<T>(GoogleBigQueryJobAttribute attribute, ValueBindingContext valueBindingContext) where T : class {
 
-            IClientCacheService<T> tableDataClientCacheService = new ClientCacheService<T>();
-            var service = tableDataClientCacheService.GetClient(attribute);
+        //    IClientCacheService<T> tableDataClientCacheService = new ClientCacheService<T>();
+        //    var service = tableDataClientCacheService.GetClient(attribute);
 
-            return Task.FromResult<T>(service);
-        }
+        //    return Task.FromResult<T>(service);
+        //}
 
     }
 }

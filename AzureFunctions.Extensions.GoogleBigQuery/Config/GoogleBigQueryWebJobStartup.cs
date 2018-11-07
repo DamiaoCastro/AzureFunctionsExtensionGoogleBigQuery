@@ -2,7 +2,7 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 
-[assembly: WebJobsStartup(typeof(GoogleBigQueryWebJobStartup), "GoogleBigQuery")]
+[assembly: WebJobsStartup(typeof(GoogleBigQueryWebJobStartup))]
 namespace AzureFunctions.Extensions.GoogleBigQuery.Config {
 
     class GoogleBigQueryWebJobStartup : IWebJobsStartup {

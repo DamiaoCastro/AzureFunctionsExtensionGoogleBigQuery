@@ -7,7 +7,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
     public class TableDataClientCacheService : ITableDataClientCacheService {
 
         bq.ITabledata ITableDataClientCacheService.GetTabledataClient(GoogleBigQueryAttribute googleBigQueryAttribute) {
-            var key = $"{googleBigQueryAttribute.GetHashCode()}".GetHashCode();
+            var key = googleBigQueryAttribute.GetHashCode();
 
             if (tableDataClientCache.ContainsKey(key)) {
                 var expiringService = tableDataClientCache[key];
@@ -24,31 +24,13 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
         private static ConcurrentDictionary<int, ExpiringService<bq.ITabledata>> tableDataClientCache = new ConcurrentDictionary<int, ExpiringService<bq.ITabledata>>();
 
         private ITabledata GenerateAndSaveNewService(GoogleBigQueryAttribute googleBigQueryAttribute, int key) {
-            var credentials = GetCredentials(googleBigQueryAttribute);
-            bq.ITabledata tableData = new Tabledata(credentials);
+            bq.ITabledata tableData = new Tabledata(googleBigQueryAttribute.Credentials);
             var expiringService1 = new ExpiringService<bq.ITabledata>(DateTime.UtcNow, tableData);
             tableDataClientCache.AddOrUpdate(key, expiringService1, (newkey, oldValue) => expiringService1);
 
             return tableData;
         }
-
-        private byte[] GetCredentials(GoogleBigQueryAttribute googleBigQueryAttribute) {
-
-            byte[] googleCredential = null;
-            if (googleBigQueryAttribute.Credentials != null) {
-                googleCredential = googleBigQueryAttribute.Credentials;
-            } else {
-                if (!string.IsNullOrWhiteSpace(googleBigQueryAttribute.CredentialsFileName)) {
-                    var path = System.IO.Path.GetDirectoryName(typeof(GoogleBigQueryAttribute).Assembly.Location);
-                    var fullPath = System.IO.Path.Combine(path, "..", googleBigQueryAttribute.CredentialsFileName);
-                    var credentials = System.IO.File.ReadAllBytes(fullPath);
-                    googleCredential = credentials;
-                }
-            }
-
-            return googleCredential;
-        }
-
+        
         private class ExpiringService<T> {
 
             public ExpiringService(DateTime createdUtc, T service) {

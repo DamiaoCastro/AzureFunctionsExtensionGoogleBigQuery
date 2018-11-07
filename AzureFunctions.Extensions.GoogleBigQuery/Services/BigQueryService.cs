@@ -18,7 +18,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
         private readonly ITableDataClientCacheService tableDataClientCacheService;
 
         public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, ITableDataClientCacheService tableDataClientCacheService) {
-            this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
+            this.googleBigQueryAttribute = googleBigQueryAttribute;
             this.tableDataClientCacheService = tableDataClientCacheService;
         }
 
