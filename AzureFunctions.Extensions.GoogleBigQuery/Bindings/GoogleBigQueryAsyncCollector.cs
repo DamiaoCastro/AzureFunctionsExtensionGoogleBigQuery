@@ -10,14 +10,14 @@ using TransparentApiClient.Google.Core;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.Bindings {
 
-    
+
     public class GoogleBigQueryAsyncCollector : ICollector<IGoogleBigQueryRow>, IAsyncCollector<IGoogleBigQueryRow> {
 
-        private readonly ITableData bigQueryService;
+        private readonly IBigQueryService bigQueryService;
 
         private List<IGoogleBigQueryRow> items = new List<IGoogleBigQueryRow>();
 
-        public GoogleBigQueryAsyncCollector(ITableData bigQueryService) {
+        public GoogleBigQueryAsyncCollector(IBigQueryService bigQueryService) {
             this.bigQueryService = bigQueryService;
         }
 
@@ -57,32 +57,35 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Bindings {
 
             }
 
-            return Task.WhenAll(tasks)
-                .ContinueWith((Task<BaseResponse<TableDataInsertAllResponse>[]> allTasks) => {
-                    if (allTasks.IsFaulted) {
-                        throw allTasks.Exception.InnerException;
-                    } else {
+            if (tasks.Any()) {
+                return Task.WhenAll(tasks).ContinueWith(AnalyseReponse);
+            } else {
+                return Task.CompletedTask;
+            }
+        }
 
-                        var qBadRequest = allTasks.Result.Where(c => c != null && c.Response == null && c.ResponseCode == System.Net.HttpStatusCode.BadRequest);
-                        if (qBadRequest.Any()) {
-                            throw new Exception(qBadRequest.First().Error.message);
-                        }
+        private void AnalyseReponse(Task<BaseResponse<TableDataInsertAllResponse>[]> allTasks) {
+            if (allTasks.IsFaulted) {
+                throw allTasks.Exception.InnerException;
+            } else {
 
-                        var errorResponses = allTasks.Result.Where(c => c != null && c.Response.insertErrors != null && c.Response.insertErrors.Any());
+                var qBadRequest = allTasks.Result.Where(c => c != null && c.Response == null && c.ResponseCode == System.Net.HttpStatusCode.BadRequest);
+                if (qBadRequest.Any()) {
+                    throw new Exception(qBadRequest.First().Error.message);
+                }
 
-                        if (errorResponses.Any()) {
-                            var listErrors = from e in errorResponses
-                                             from ie in e.Response.insertErrors
-                                             from le in ie.errors
-                                             select le.message;
+                var errorResponses = allTasks.Result.Where(c => c != null && c.Response.insertErrors != null && c.Response.insertErrors.Any());
 
-                            throw new Exception("BigQuery insert errors", new Exception(string.Join("\n", listErrors)));
-                        }
-                    }
-                });
+                if (errorResponses.Any()) {
+                    var listErrors = from e in errorResponses
+                                     from ie in e.Response.insertErrors
+                                     from le in ie.errors
+                                     select le.message;
 
+                    throw new Exception("BigQuery insert errors", new Exception(string.Join("\n", listErrors)));
+                }
+            }
         }
 
     }
-
 }

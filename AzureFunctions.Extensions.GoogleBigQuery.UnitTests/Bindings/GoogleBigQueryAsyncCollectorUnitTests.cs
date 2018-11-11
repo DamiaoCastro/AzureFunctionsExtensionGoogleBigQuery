@@ -7,23 +7,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TransparentApiClient.Google.BigQuery.V2.Schema;
 using TransparentApiClient.Google.Core;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
+namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests.Bindings {
 
     [TestClass]
     public class GoogleBigQueryAsyncCollectorUnitTests {
 
-        private Mock<ITableData> bigQueryServiceMock = null;
+        private Mock<IBigQueryService> bigQueryServiceMock = new Mock<IBigQueryService>();
         private ICollector<IGoogleBigQueryRow> objectToTest = null;
 
         [TestInitialize]
         public void Init() {
-            bigQueryServiceMock = new Mock<ITableData>();
             objectToTest = new GoogleBigQueryAsyncCollector(bigQueryServiceMock.Object);
         }
 
