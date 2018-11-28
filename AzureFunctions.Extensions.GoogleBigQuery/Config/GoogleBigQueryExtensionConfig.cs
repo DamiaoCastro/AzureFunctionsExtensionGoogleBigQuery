@@ -46,7 +46,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Config {
 
         private GoogleBigQueryAsyncCollector GetGoogleBigQueryAsyncCollector(GoogleBigQueryCollectorAttribute googleBigQueryCollectorAttribute) {
 
-            var bigQueryService = serviceFactory.GetService<BigQueryService>(googleBigQueryCollectorAttribute);
+            var bigQueryService = serviceFactory.GetService<IBigQueryService>(googleBigQueryCollectorAttribute);
             var service = new GoogleBigQueryAsyncCollector(bigQueryService);
 
             return service;
