@@ -7,7 +7,7 @@ using TransparentApiClient.Google.Core;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
 
-    public interface ITableData {
+    public interface IBigQueryService {
 
         Task<BaseResponse<TableDataInsertAllResponse>> InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken);
 

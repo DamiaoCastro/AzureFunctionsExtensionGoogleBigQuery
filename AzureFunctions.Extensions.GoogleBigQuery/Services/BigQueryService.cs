@@ -10,34 +10,32 @@ using TransparentApiClient.Google.BigQuery.V2.Schema;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
 
-    public class BigQueryService : ITableData {
+    public class BigQueryService : IBigQueryService {
 
         private const string BigQueryDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
-        private readonly GoogleBigQueryAttribute googleBigQueryAttribute;
-        private readonly ITableDataClientCacheService tableDataClientCacheService;
+        private readonly GoogleBigQueryCollectorAttribute googleBigQueryCollectorAttribute;
+        private readonly ITabledata tabledata;
 
-        public BigQueryService(GoogleBigQueryAttribute googleBigQueryAttribute, ITableDataClientCacheService tableDataClientCacheService) {
-            this.googleBigQueryAttribute = GoogleBigQueryAttribute.GetAttributeByConfiguration(googleBigQueryAttribute);
-            this.tableDataClientCacheService = tableDataClientCacheService;
+        public BigQueryService(GoogleBigQueryCollectorAttribute googleBigQueryCollectorAttribute, ITabledata tabledata) {
+            this.googleBigQueryCollectorAttribute = googleBigQueryCollectorAttribute ?? throw new ArgumentNullException(nameof(googleBigQueryCollectorAttribute));
+            this.tabledata = tabledata ?? throw new ArgumentNullException(nameof(tabledata));
         }
 
-        Task<BaseResponse<TableDataInsertAllResponse>> ITableData.InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken) {
+        Task<BaseResponse<TableDataInsertAllResponse>> IBigQueryService.InsertRowsAsync(DateTime? date, IEnumerable<IGoogleBigQueryRow> rows, CancellationToken cancellationToken) {
 
             if (rows != null && rows.Count() > 0) {
 
-                string tableName = googleBigQueryAttribute.TableId;
+                string tableName = googleBigQueryCollectorAttribute.TableId;
                 if (date.HasValue) {
-                    tableName = $"{googleBigQueryAttribute.TableId}${date.Value:yyyyMMdd}";
+                    tableName = $"{googleBigQueryCollectorAttribute.TableId}${date.Value:yyyyMMdd}";
                 }
 
                 var settings = new JsonSerializerSettings() { DateFormatString = BigQueryDateTimeFormat };
 
-                ITabledata tabledataClient = tableDataClientCacheService.GetTabledataClient(googleBigQueryAttribute);
-
-                return tabledataClient.InsertAllAsync(
-                    googleBigQueryAttribute.DatasetId,
-                    googleBigQueryAttribute.ProjectId,
+                return tabledata.InsertAllAsync(
+                    googleBigQueryCollectorAttribute.DatasetId,
+                    googleBigQueryCollectorAttribute.ProjectId,
                     tableName,
                     new TableDataInsertAllRequest() {
                         ignoreUnknownValues = true,

@@ -4,13 +4,12 @@ using Moq;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TransparentApiClient.Google.BigQuery.V2.Resources;
 using TransparentApiClient.Google.BigQuery.V2.Schema;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
+namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests.Services {
 
     [TestClass]
     public class BigQueryServiceUnitTests {
@@ -19,9 +18,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
         public async Task InsertRowsAsync_NullRows_Success() {
 
             //arrange
-            var googleBigQueryAttribute = new GoogleBigQueryAttribute("credentialsFileName", "projectId", "datasetId", "tableId");
-            var tableDataClientCacheService = new Mock<ITableDataClientCacheService>();
-            ITableData objectToTest = new BigQueryService(googleBigQueryAttribute, tableDataClientCacheService.Object);
+            var googleBigQueryAttribute = new GoogleBigQueryCollectorAttribute("credentialsSettingKey", "projectId", "datasetId", "tableId");
+            var tableDataClient = new Mock<ITabledata>();
+            IBigQueryService objectToTest = new BigQueryService(googleBigQueryAttribute, tableDataClient.Object);
 
             //act
             var response = await objectToTest.InsertRowsAsync(null, null, CancellationToken.None);
@@ -35,9 +34,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
         public async Task InsertRowsAsync_NoRows_Success() {
 
             //arrange
-            var googleBigQueryAttribute = new GoogleBigQueryAttribute("credentialsFileName", "projectId", "datasetId", "tableId");
-            var tableDataClientCacheService = new Mock<ITableDataClientCacheService>();
-            ITableData objectToTest = new BigQueryService(googleBigQueryAttribute, tableDataClientCacheService.Object);
+            var googleBigQueryAttribute = new GoogleBigQueryCollectorAttribute("credentialsSettingKey", "projectId", "datasetId", "tableId");
+            var tableDataClient = new Mock<ITabledata>();
+            IBigQueryService objectToTest = new BigQueryService(googleBigQueryAttribute, tableDataClient.Object);
             var rows = new List<IGoogleBigQueryRow>();
 
             //act
@@ -52,7 +51,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
         public async Task InsertRowsAsync_OneRowNoDate_Success() {
 
             //arrange
-            var googleBigQueryAttribute = new GoogleBigQueryAttribute("credentialsFileName", "projectId", "datasetId", "tableId");
+            var googleBigQueryAttribute = new GoogleBigQueryCollectorAttribute("credentialsSettingKey", "projectId", "datasetId", "tableId");
             var tabledataMock = new Mock<ITabledata>();
             int countInsertAllAsync = 0;
             tabledataMock
@@ -67,9 +66,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
                 .Callback(() => { countInsertAllAsync++; })
                 .ReturnsAsync(new TransparentApiClient.Google.Core.BaseResponse<TableDataInsertAllResponse>());
 
-            var tableDataClientCacheService = new Mock<ITableDataClientCacheService>();
-            tableDataClientCacheService.Setup(c => c.GetTabledataClient(It.IsAny<GoogleBigQueryAttribute>())).Returns(tabledataMock.Object);
-            ITableData objectToTest = new BigQueryService(googleBigQueryAttribute, tableDataClientCacheService.Object);
+            IBigQueryService objectToTest = new BigQueryService(googleBigQueryAttribute, tabledataMock.Object);
             var rows = new List<IGoogleBigQueryRow>() {
                 new GoogleBigQueryRow(null, null)
             };
@@ -87,7 +84,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
         public async Task InsertRowsAsync_OneRowWithDate_Success() {
 
             //arrange
-            var googleBigQueryAttribute = new GoogleBigQueryAttribute("credentialsFileName", "projectId", "datasetId", "tableId");
+            var googleBigQueryAttribute = new GoogleBigQueryCollectorAttribute("credentialsSettingKey", "projectId", "datasetId", "tableId");
             var tabledataMock = new Mock<ITabledata>();
             int countInsertAllAsync = 0;
             tabledataMock
@@ -102,9 +99,7 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
                 .Callback(() => { countInsertAllAsync++; })
                 .ReturnsAsync(new TransparentApiClient.Google.Core.BaseResponse<TableDataInsertAllResponse>());
 
-            var tableDataClientCacheService = new Mock<ITableDataClientCacheService>();
-            tableDataClientCacheService.Setup(c => c.GetTabledataClient(It.IsAny<GoogleBigQueryAttribute>())).Returns(tabledataMock.Object);
-            ITableData objectToTest = new BigQueryService(googleBigQueryAttribute, tableDataClientCacheService.Object);
+            IBigQueryService objectToTest = new BigQueryService(googleBigQueryAttribute, tabledataMock.Object);
             var rows = new List<IGoogleBigQueryRow>() {
                 new GoogleBigQueryRow(null, null)
             };

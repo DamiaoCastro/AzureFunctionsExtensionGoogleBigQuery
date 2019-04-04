@@ -12,48 +12,50 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Config {
     [Extension("GoogleBigQuery", "GoogleBigQuery")]
     public partial class GoogleBigQueryExtensionConfig : IExtensionConfigProvider {
 
+        private readonly static IServiceCache serviceCache = new ServiceCache();
+        private readonly static IServiceFactory serviceFactory = new ServiceFactory(serviceCache);
+
         void IExtensionConfigProvider.Initialize(ExtensionConfigContext context) {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
 
             context
-                .AddBindingRule<GoogleBigQueryAttribute>()
-                .BindToCollector(c => GetGoogleBigQueryAsyncCollector(c));
+                .AddBindingRule<GoogleBigQueryCollectorAttribute>()
+                .BindToCollector(GetGoogleBigQueryAsyncCollector);
 
             context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
+                .AddBindingRule<GoogleBigQueryResourceAttribute>()
                 .BindToInput(GetGoogleBigQueryJobInput<IDatasets>);
 
             context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
+                .AddBindingRule<GoogleBigQueryResourceAttribute>()
                 .BindToInput(GetGoogleBigQueryJobInput<IJobs>);
 
             context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
+                .AddBindingRule<GoogleBigQueryResourceAttribute>()
                 .BindToInput(GetGoogleBigQueryJobInput<IProjects>);
 
             context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
+                .AddBindingRule<GoogleBigQueryResourceAttribute>()
                 .BindToInput(GetGoogleBigQueryJobInput<ITabledata>);
 
             context
-                .AddBindingRule<GoogleBigQueryJobAttribute>()
+                .AddBindingRule<GoogleBigQueryResourceAttribute>()
                 .BindToInput(GetGoogleBigQueryJobInput<ITables>);
 
         }
 
-        private GoogleBigQueryAsyncCollector GetGoogleBigQueryAsyncCollector(GoogleBigQueryAttribute googleBigQueryAttribute) {
+        private GoogleBigQueryAsyncCollector GetGoogleBigQueryAsyncCollector(GoogleBigQueryCollectorAttribute googleBigQueryCollectorAttribute) {
 
-            ITableDataClientCacheService tableDataClientCacheService = new TableDataClientCacheService();
-            var bigQueryService = new BigQueryService(googleBigQueryAttribute, tableDataClientCacheService);
+            var bigQueryService = serviceFactory.GetService<IBigQueryService>(googleBigQueryCollectorAttribute);
+            var service = new GoogleBigQueryAsyncCollector(bigQueryService);
 
-            return new GoogleBigQueryAsyncCollector(bigQueryService);
+            return service;
         }
 
-        private Task<T> GetGoogleBigQueryJobInput<T>(GoogleBigQueryJobAttribute attribute, ValueBindingContext valueBindingContext) where T : class {
+        private Task<T> GetGoogleBigQueryJobInput<T>(GoogleBigQueryResourceAttribute googleBigQueryResourceAttribute, ValueBindingContext valueBindingContext) where T : class {
 
-            IClientCacheService<T> tableDataClientCacheService = new ClientCacheService<T>();
-            var service = tableDataClientCacheService.GetClient(attribute);
-
+            var service = serviceFactory.GetService<T>(googleBigQueryResourceAttribute);
+            
             return Task.FromResult<T>(service);
         }
 

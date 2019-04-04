@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace AzureFunctions.Extensions.GoogleBigQuery.Services {
+namespace AzureFunctions.Extensions.GoogleBigQuery {
     [Serializable]
-    internal class MissingSettingException : Exception {
+    public class MissingSettingException : Exception {
         public MissingSettingException() {
         }
 

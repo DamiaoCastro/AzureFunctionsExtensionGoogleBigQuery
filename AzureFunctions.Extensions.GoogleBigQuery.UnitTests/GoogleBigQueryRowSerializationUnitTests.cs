@@ -12,9 +12,9 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
             public GoogleBigQueryRowExtended(DateTime? date, string insertId) : base(date, insertId) {
             }
 
-            [Newtonsoft.Json.JsonProperty]
+            [JsonProperty]
             [System.ComponentModel.DataAnnotations.Schema.Column]
-            public int test { get; set; }
+            public int Test { get; set; }
 
         }
 
@@ -43,14 +43,15 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests {
             //Arrange
             var date = DateTime.UtcNow.Date;
             var insertId = Guid.NewGuid().ToString();
-            var row = new GoogleBigQueryRowExtended(date, insertId);
-            row.test = 1;
+            var row = new GoogleBigQueryRowExtended(date, insertId) {
+                Test = 1
+            };
 
             //Act
             var serialization = JsonConvert.SerializeObject(row);
 
             //Assert
-            Assert.AreEqual("{\"test\":1}", serialization);
+            Assert.AreEqual("{\"Test\":1}", serialization);
             Assert.AreEqual(date, ((IGoogleBigQueryRow)row).getPartitionDate());
             Assert.AreEqual(insertId, ((IGoogleBigQueryRow)row).getInsertId());
 
