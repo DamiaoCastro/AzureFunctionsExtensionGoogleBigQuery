@@ -1,26 +1,12 @@
 ﻿using Microsoft.Azure.WebJobs.Description;
 using System;
+using System.Linq;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery {
 
     [Binding]
     [AttributeUsage(AttributeTargets.Parameter)]
     public sealed class GoogleBigQueryCollectorAttribute : GoogleBigQueryBaseAttribute {
-
-        /// <summary>
-        /// Use this attribute to bind to ICollector<IGoogleBigQueryRow>, meaning ICollector<*My*GoogleBigQueryRow> or ICollector<GoogleBigQueryRowJObject>.
-        /// The values collected will be writen using the streaming API of BigQuery. Please note that the streaming API, when writting to DAY partioned tables has a data range limitation.
-        /// More information about BigQuery streaming api in the page. https://cloud.google.com/bigquery/streaming-data-into-bigquery
-        /// </summary>
-        /// <param name="credentialsSettingKey">setting key where the value is the string representation of the JSON credential files given in the google cloud service account.</param>
-        /// <param name="projectId">project id ( differs from project name )</param>
-        /// <param name="datasetId">dataset id</param>
-        /// <param name="tableId">table id</param>
-        public GoogleBigQueryCollectorAttribute(string credentialsSettingKey, string projectId, string datasetId, string tableId) : base(credentialsSettingKey) {
-            ProjectId = projectId;
-            DatasetId = datasetId;
-            TableId = tableId;
-        }
 
         /// <summary>
         /// Use this attribute to bind to ICollector<IGoogleBigQueryRow>, meaning ICollector<*My*GoogleBigQueryRow> or ICollector<GoogleBigQueryRowJObject>.
@@ -49,6 +35,41 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
             }
         }
 
+        public GoogleBigQueryCollectorAttribute(string credentialsSettingKey, string tableFullNameSettingKey) : base(credentialsSettingKey) {
+
+            if (!string.IsNullOrWhiteSpace(tableFullNameSettingKey)) {
+
+                var value = Environment.GetEnvironmentVariable(tableFullNameSettingKey, EnvironmentVariableTarget.Process);
+                if (!string.IsNullOrWhiteSpace(value)) {
+                    var items = value.Split(new string[] { ":", "." }, StringSplitOptions.RemoveEmptyEntries);
+                    if (items.Count() == 3) {
+                        //throw new ArgumentException($"Expected 'projectId.datasetId.tableId' format in {nameof(tableFullNameSettingKey)}");
+
+                        ProjectId = items[0];
+                        DatasetId = items[1];
+                        TableId = items[2];
+                    }
+                }
+            }
+
+            TableFullNameSettingKey = tableFullNameSettingKey;
+        }
+
+        /// <summary>
+        /// Use this attribute to bind to ICollector<IGoogleBigQueryRow>, meaning ICollector<*My*GoogleBigQueryRow> or ICollector<GoogleBigQueryRowJObject>.
+        /// The values collected will be writen using the streaming API of BigQuery. Please note that the streaming API, when writting to DAY partioned tables has a data range limitation.
+        /// More information about BigQuery streaming api in the page. https://cloud.google.com/bigquery/streaming-data-into-bigquery
+        /// </summary>
+        /// <param name="credentialsSettingKey">setting key where the value is the string representation of the JSON credential files given in the google cloud service account.</param>
+        /// <param name="projectId">project id ( differs from project name )</param>
+        /// <param name="datasetId">dataset id</param>
+        /// <param name="tableId">table id</param>
+        public GoogleBigQueryCollectorAttribute(string credentialsSettingKey, string projectId, string datasetId, string tableId) : base(credentialsSettingKey) {
+            ProjectId = projectId;
+            DatasetId = datasetId;
+            TableId = tableId;
+        }
+
         public string ConfigurationNodeName { get; }
 
         public string ProjectId { get; }
@@ -56,6 +77,8 @@ namespace AzureFunctions.Extensions.GoogleBigQuery {
         public string DatasetId { get; }
 
         public string TableId { get; }
+
+        public string TableFullNameSettingKey { get; }
 
         internal override string GetObjectKey() {
             return $"{ConfigurationNodeName}|{CredentialsSettingKey}|{ProjectId}|{DatasetId}|{TableId}";
