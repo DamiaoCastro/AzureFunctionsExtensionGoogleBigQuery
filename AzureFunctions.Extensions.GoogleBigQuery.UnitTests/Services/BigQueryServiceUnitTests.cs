@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TransparentApiClient.Google.BigQuery.V2.Resources;
-using TransparentApiClient.Google.BigQuery.V2.Schema;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests.Services {
 

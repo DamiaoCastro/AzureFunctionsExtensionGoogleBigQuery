@@ -3,53 +3,77 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AzureFunctions.Extensions.GoogleBigQuery.Services;
+using Google.Cloud.BigQuery.V2;
 using Microsoft.Azure.WebJobs;
-using TransparentApiClient.Google.BigQuery.V2.Schema;
-using TransparentApiClient.Google.Core;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.Bindings {
 
-    public class GoogleBigQueryAsyncCollector : ICollector<IGoogleBigQueryRow>, IAsyncCollector<IGoogleBigQueryRow>, IDisposable {
+    public class GoogleBigQueryAsyncCollector : ICollector<BqRow>, IAsyncCollector<BqRow>, IDisposable {
 
-        private readonly IBigQueryService bigQueryService;
-        private List<IGoogleBigQueryRow> items = new List<IGoogleBigQueryRow>();
+        private List<BqRow> items = new List<BqRow>();
+        private readonly GoogleBigQueryCollectorAttribute googleBigQueryCollectorAttribute;
+        private readonly BigQueryClient bigqueryClient;
 
-        public GoogleBigQueryAsyncCollector(IBigQueryService bigQueryService) {
-            this.bigQueryService = bigQueryService;
+        public GoogleBigQueryAsyncCollector(GoogleBigQueryCollectorAttribute googleBigQueryCollectorAttribute, BigQueryClient bigqueryClient) {
+            this.googleBigQueryCollectorAttribute = googleBigQueryCollectorAttribute;
+            this.bigqueryClient = bigqueryClient;
         }
 
-        void ICollector<IGoogleBigQueryRow>.Add(IGoogleBigQueryRow item) {
+        void ICollector<BqRow>.Add(BqRow item) {
             if (item == null) { throw new ArgumentNullException(nameof(item)); }
             items.Add(item);
         }
 
-        Task IAsyncCollector<IGoogleBigQueryRow>.AddAsync(IGoogleBigQueryRow item, CancellationToken cancellationToken) {
+        Task IAsyncCollector<BqRow>.AddAsync(BqRow item, CancellationToken cancellationToken) {
             if (item == null) { throw new ArgumentNullException(nameof(item)); }
             items.Add(item);
             return Task.CompletedTask;
         }
 
-        Task IAsyncCollector<IGoogleBigQueryRow>.FlushAsync(CancellationToken cancellationToken) {
+        Task IAsyncCollector<BqRow>.FlushAsync(CancellationToken cancellationToken) {
             return InsertGoogleBigQueryRows(items, cancellationToken);
         }
 
-        private Task InsertGoogleBigQueryRows(IEnumerable<IGoogleBigQueryRow> googleBigQueryRows, CancellationToken cancellationToken) {
-            var tasks = new List<Task<BaseResponse<TableDataInsertAllResponse>>>();
+        private Task InsertGoogleBigQueryRows(IEnumerable<BqRow> googleBigQueryRows, CancellationToken cancellationToken) {
+            var tasks = new List<Task<BigQueryInsertResults>>();
 
             if (googleBigQueryRows != null && googleBigQueryRows.Any()) {
 
                 //items without date
                 {
-                    var rows = googleBigQueryRows.OfType<IGoogleBigQueryRow>().Where(c => !c.getPartitionDate().HasValue);
-                    if (rows.Any()) { tasks.Add(bigQueryService.InsertRowsAsync(null, rows, cancellationToken)); }
+                    IEnumerable<BigQueryInsertRow> rows = googleBigQueryRows.Where(c => !c.Date.HasValue).Select(r => r.AsBigQueryInsertRow());
+
+                    if (rows.Any()) {
+
+                        Task<BigQueryInsertResults> t = bigqueryClient
+                            .InsertRowsAsync(
+                                googleBigQueryCollectorAttribute.DatasetId,
+                                googleBigQueryCollectorAttribute.TableId,
+                                rows,
+                                new InsertOptions() { AllowEmptyInsertIds = true, AllowUnknownFields = true, SuppressInsertErrors = false },
+                                cancellationToken
+                                );
+
+                        tasks.Add(t);
+                    }
                 }
 
                 //items with date
                 {
-                    var groups = googleBigQueryRows.OfType<IGoogleBigQueryRow>().Where(c => c.getPartitionDate().HasValue).GroupBy(c => c.getPartitionDate().Value.Date);
+                    var groups = googleBigQueryRows.Where(c => c.Date.HasValue).GroupBy(c => c.Date.Value.Date);
                     foreach (var group in groups) {
-                        tasks.Add(bigQueryService.InsertRowsAsync(group.Key, group, cancellationToken));
+
+                        var rows = group.Select(r => r.AsBigQueryInsertRow()); ;
+
+                        Task<BigQueryInsertResults> t = bigqueryClient
+                            .InsertRowsAsync(
+                                googleBigQueryCollectorAttribute.DatasetId,
+                                $"{googleBigQueryCollectorAttribute.TableId}${group.Key:yyyyMMdd}",
+                                rows,
+                                new InsertOptions() { AllowEmptyInsertIds = true, AllowUnknownFields = true, SuppressInsertErrors = false },
+                                cancellationToken
+                                );
+
                     }
                 }
 
@@ -59,28 +83,17 @@ namespace AzureFunctions.Extensions.GoogleBigQuery.Bindings {
             return Task.CompletedTask;
         }
 
-        private void AnalyseReponse(Task<BaseResponse<TableDataInsertAllResponse>[]> allTasks) {
+        private void AnalyseReponse(Task<BigQueryInsertResults[]> allTasks) {
             if (allTasks.IsFaulted) {
                 throw allTasks.Exception.InnerException;
             } else {
 
-                var qError = allTasks.Result.Where(c => c != null && c.Response == null
-                            && (c.ResponseCode == System.Net.HttpStatusCode.BadRequest || c.ResponseCode == System.Net.HttpStatusCode.NotFound));
+                var qError = allTasks.Result.Where(c => c != null && c.Errors.Any());
 
                 if (qError.Any()) {
-                    throw new Exception(qError.First().Error.message);
+                    qError.First().ThrowOnAnyError();
                 }
 
-                var errorResponses = allTasks.Result.Where(c => c != null && c.Response != null && c.Response.insertErrors != null && c.Response.insertErrors.Any());
-
-                if (errorResponses.Any()) {
-                    var listErrors = from e in errorResponses
-                                     from ie in e.Response.insertErrors
-                                     from le in ie.errors
-                                     select le.message;
-
-                    throw new Exception("BigQuery insert errors", new Exception(string.Join("\n", listErrors)));
-                }
             }
         }
 

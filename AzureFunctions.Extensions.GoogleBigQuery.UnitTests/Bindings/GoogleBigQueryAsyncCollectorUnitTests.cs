@@ -9,8 +9,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using TransparentApiClient.Google.BigQuery.V2.Schema;
-using TransparentApiClient.Google.Core;
 
 namespace AzureFunctions.Extensions.GoogleBigQuery.UnitTests.Bindings {
 
